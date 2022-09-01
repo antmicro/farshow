@@ -3,6 +3,17 @@
 
 #include <iostream>
 #include <unistd.h>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/highgui.hpp>
+
+
+
+void showImage(cv::Mat frame, std::string winName)
+{
+    namedWindow(winName, cv::WINDOW_AUTOSIZE );// Create a window for display.
+    imshow(winName, frame);
+    cv::waitKey(0);
+}
 
 FrameStreamer::FrameStreamer(std::string clientIp, int clientPort, int myPort, std::string myIp)
 {
@@ -61,6 +72,47 @@ void FrameStreamer::receiveMessage()
         throw StreamException("Cannot receive message", errno);
     }
     std::cout << "recived: " << buff << std::endl;
+}
+
+void FrameStreamer::sendFrame(cv::Mat frame)
+{
+    struct FrameMessage msg;
+
+    std::vector<uchar> buf;
+    cv::imencode(".jpg", frame, buf, {cv::IMWRITE_JPEG_QUALITY, 65});
+
+    showImage(frame, "Before sending");
+
+    strcpy(msg.name, name.c_str()); //TODO: check length
+    memcpy(msg.data, buf.data(), buf.size());
+
+    if (sendto(mySocket, &msg, sizeof(msg), 0, (const struct sockaddr *)&clientAddress, sizeof(clientAddress)) < 0)
+    {
+        close(mySocket);
+        throw StreamException("Cannot send", errno);
+    }
+    else
+    {
+        std::cout << "sent image" << std::endl;
+    }
+}
+
+void FrameStreamer::receiveFrame()
+{
+    struct FrameMessage msg;
+
+    unsigned int len = sizeof(clientAddress);
+
+    if (recvfrom(mySocket, &msg, sizeof(msg), MSG_WAITALL, (struct sockaddr *)&clientAddress, &len) < 0)
+    {
+        close(mySocket);
+        throw StreamException("Cannot receive message", errno);
+    }
+
+    std::vector<unsigned char> buf(msg.data, msg.data + MAX_IMG_SIZE);
+    cv::Mat frame = cv::imdecode(buf, cv::IMREAD_UNCHANGED);
+
+    showImage(frame, "Received frame");
 }
 
 FrameStreamer::~FrameStreamer() { close(mySocket); }
