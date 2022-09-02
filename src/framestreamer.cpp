@@ -80,9 +80,8 @@ void FrameStreamer::sendFrame(cv::Mat frame)
 
     strcpy(msg.data, name.c_str());
     msg.name_length = sizeof(name.c_str());
-    msg.packet_id = 0;
     msg.frame_id = 0;
-    msg.frames_in_packet = 1;
+    msg.part_id = 0;
 
     std::vector<uchar> buf;
     int available_space = DATAGRAM_SIZE - msg.name_length - 4 * sizeof(short int) - 1;
@@ -91,28 +90,36 @@ void FrameStreamer::sendFrame(cv::Mat frame)
 
     showImage(frame, "Before sending");
 
-    // std::cout << buf.size() << " " << available_space << std::endl;
     if (buf.size() <= available_space)
     {
-        memcpy(msg.data + msg.name_length, buf.data(), buf.size());
-        std::cout << "image copied\n";
+        msg.parts_in_packet = 1;
     }
     else
     {
-        std::cout << "Image is too big\n";
+        msg.parts_in_packet = std::ceil((float)buf.size()/available_space); //TODO: don't send name in further messages
+        std::cout << buf.size() << "/ " << available_space << " = " << msg.parts_in_packet << std::endl; 
     }
 
     std::cout << "msg size " << sizeof(msg) << "\n";
     std::cout << name << " " << name.c_str() << " " << sizeof(name.c_str()) << " " << sizeof("test") << std::endl;
 
-    if (sendto(mySocket, &msg, sizeof(msg), 0, (const struct sockaddr *)&clientAddress, sizeof(clientAddress)) < 0)
+    // Send packets
+    uchar *data = buf.data();
+
+    while (data <= buf.data() + buf.size())
     {
-        close(mySocket);
-        throw StreamException("Cannot send", errno);
-    }
-    else
-    {
-        std::cout << "sent image" << std::endl;
+        memcpy(msg.data + msg.name_length, data, available_space);
+        if (sendto(mySocket, &msg, sizeof(msg), 0, (const struct sockaddr *)&clientAddress, sizeof(clientAddress)) < 0)
+        {
+            close(mySocket);
+            throw StreamException("Cannot send", errno);
+        }
+        else
+        {
+            std::cout << "sent image" << std::endl;
+        }
+        msg.part_id++;
+        data += available_space;
     }
 }
 
@@ -122,7 +129,7 @@ void FrameStreamer::receiveFrame()
 
     struct FrameMessage msg;
 
-    if (recvfrom(mySocket, &msg, sizeof(msg), MSG_WAITALL, (struct sockaddr *)&clientAddress, &addr_size) < 0)
+    if (recvfrom(mySocket, &msg, sizeof(msg), MSG_WAITALL | MSG_PEEK, (struct sockaddr *)&clientAddress, &addr_size) < 0)
     {
         close(mySocket);
         throw StreamException("Cannot receive message", errno);
@@ -131,10 +138,33 @@ void FrameStreamer::receiveFrame()
     char *name = new char (msg.name_length);
     strcpy(name, msg.data);
 
-    std::vector<unsigned char> buf(msg.data + msg.name_length, msg.data + DATAGRAM_SIZE - 4 * sizeof(short int) - 1);
+    int part_size = DATAGRAM_SIZE - 4 * sizeof(short int) - 1 - msg.name_length;
+    std::vector<unsigned char> buf(msg.parts_in_packet * part_size);
+    unsigned char *position = buf.data();
+
+    std::cout << "Prepared for " << msg.parts_in_packet << "parts\n";
+
+    for (int i=0; i < msg.parts_in_packet; i++)
+    {
+        if (recvfrom(mySocket, &msg, sizeof(msg), MSG_WAITALL, (struct sockaddr *)&clientAddress, &addr_size) < 0)
+        {
+            close(mySocket);
+            throw StreamException("Cannot receive message", errno);
+        }
+        else
+        {
+            std::cout << "received part\n";
+        }
+        memcpy(position, msg.data + msg.name_length, part_size);
+        position += part_size;
+    }
+
+    // std::vector<unsigned char> buf(msg.data + msg.name_length, msg.data + DATAGRAM_SIZE - 4 * sizeof(short int) - 1);
     cv::Mat frame = cv::imdecode(buf, cv::IMREAD_UNCHANGED);
 
     showImage(frame, name);
+
+    delete(name);
 }
 
 FrameStreamer::~FrameStreamer() { close(mySocket); }

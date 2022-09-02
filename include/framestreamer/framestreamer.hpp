@@ -9,9 +9,9 @@
 struct FrameMessage
 {
     short int name_length;
-    short int packet_id;
     short int frame_id;
-    short int frames_in_packet;
+    short int part_id;
+    short int parts_in_packet;
     char data[DATAGRAM_SIZE - 4 * sizeof(short int) - 1];
 };
 
