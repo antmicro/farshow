@@ -78,13 +78,32 @@ void FrameStreamer::sendFrame(cv::Mat frame)
 {
     struct FrameMessage msg;
 
+    strcpy(msg.data, name.c_str());
+    msg.name_length = sizeof(name.c_str());
+    msg.packet_id = 0;
+    msg.frame_id = 0;
+    msg.frames_in_packet = 1;
+
     std::vector<uchar> buf;
+    int available_space = DATAGRAM_SIZE - msg.name_length - 4 * sizeof(short int) - 1;
+
     cv::imencode(".jpg", frame, buf, {cv::IMWRITE_JPEG_QUALITY, 65});
 
     showImage(frame, "Before sending");
 
-    strcpy(msg.name, name.c_str()); //TODO: check length
-    memcpy(msg.data, buf.data(), buf.size());
+    // std::cout << buf.size() << " " << available_space << std::endl;
+    if (buf.size() <= available_space)
+    {
+        memcpy(msg.data + msg.name_length, buf.data(), buf.size());
+        std::cout << "image copied\n";
+    }
+    else
+    {
+        std::cout << "Image is too big\n";
+    }
+
+    std::cout << "msg size " << sizeof(msg) << "\n";
+    std::cout << name << " " << name.c_str() << " " << sizeof(name.c_str()) << " " << sizeof("test") << std::endl;
 
     if (sendto(mySocket, &msg, sizeof(msg), 0, (const struct sockaddr *)&clientAddress, sizeof(clientAddress)) < 0)
     {
@@ -99,20 +118,23 @@ void FrameStreamer::sendFrame(cv::Mat frame)
 
 void FrameStreamer::receiveFrame()
 {
+    unsigned int addr_size = sizeof(clientAddress);
+
     struct FrameMessage msg;
 
-    unsigned int len = sizeof(clientAddress);
-
-    if (recvfrom(mySocket, &msg, sizeof(msg), MSG_WAITALL, (struct sockaddr *)&clientAddress, &len) < 0)
+    if (recvfrom(mySocket, &msg, sizeof(msg), MSG_WAITALL, (struct sockaddr *)&clientAddress, &addr_size) < 0)
     {
         close(mySocket);
         throw StreamException("Cannot receive message", errno);
     }
 
-    std::vector<unsigned char> buf(msg.data, msg.data + MAX_IMG_SIZE);
+    char *name = new char (msg.name_length);
+    strcpy(name, msg.data);
+
+    std::vector<unsigned char> buf(msg.data + msg.name_length, msg.data + DATAGRAM_SIZE - 4 * sizeof(short int) - 1);
     cv::Mat frame = cv::imdecode(buf, cv::IMREAD_UNCHANGED);
 
-    showImage(frame, "Received frame");
+    showImage(frame, name);
 }
 
 FrameStreamer::~FrameStreamer() { close(mySocket); }

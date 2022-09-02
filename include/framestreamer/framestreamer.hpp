@@ -4,13 +4,15 @@
 #include <opencv2/core/mat.hpp> // cv::Mat
 #include <string>
 
-#define MAX_STREAM_NAME_LEN 128
-#define MAX_IMG_SIZE 65507 - MAX_STREAM_NAME_LEN // because of udp datagram size
+#define DATAGRAM_SIZE 65507
 
 struct FrameMessage
 {
-    char name[MAX_STREAM_NAME_LEN];
-    unsigned char data[MAX_IMG_SIZE];
+    short int name_length;
+    short int packet_id;
+    short int frame_id;
+    short int frames_in_packet;
+    char data[DATAGRAM_SIZE - 4 * sizeof(short int) - 1];
 };
 
 class FrameStreamer
@@ -31,7 +33,7 @@ public:
     void sendFrame(cv::Mat frame);
     void receiveFrame(); // TODO: delete
 
-    std::string name;
+    std::string name; //QUESTION: Why isn't sizeof(name.c_str()) == sizeof("test") (8 vs 5)
 
 private:
     struct sockaddr_in myAddress;
