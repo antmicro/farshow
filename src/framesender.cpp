@@ -20,7 +20,7 @@ void FrameSender::sendFrame(cv::Mat frame)
 
     // Compress the image
     std::vector<uchar> compressed_frame;
-    int available_space = DATAGRAM_SIZE - msg.header.name_length - sizeof(FrameHeader) - 3;
+    unsigned available_space = DATAGRAM_SIZE - msg.header.name_length - sizeof(FrameHeader) - 3;
 
     cv::imencode(".jpg", frame, compressed_frame, {cv::IMWRITE_JPEG_QUALITY, 95});
 
@@ -54,5 +54,6 @@ void FrameSender::sendFrame(cv::Mat frame)
         }
         msg.header.part_id++;
         position += available_space;
+        usleep (frame_parts_delay);
     }
 }

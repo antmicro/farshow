@@ -30,13 +30,16 @@ void FrameReceiver::receiveFrame()
     strcpy(name.get(), msg.data);
 
     // Wait for data
-    int part_size = DATAGRAM_SIZE - sizeof(FrameHeader) - 1 - msg.header.name_length;
-    std::vector<unsigned char> compressed_frame(msg.header.total_parts * part_size);
-    unsigned char *position = compressed_frame.data();
+    unsigned part_size = DATAGRAM_SIZE - sizeof(FrameHeader) - 3 - msg.header.name_length;
+
+    unsigned frame_size = msg.header.total_parts * part_size;
+    unsigned char *compressed_frame = new unsigned char[frame_size];
+    unsigned char *position = compressed_frame;
 
     for (int i = 0; i < msg.header.total_parts; i++)
     {
-        if (recv(mySocket, &msg, sizeof(msg), MSG_WAITALL) < 0)
+        std::cout << "waiting for msg\n";
+        if (recv(mySocket, &msg, sizeof(msg), 0) < 0)
         {
             close(mySocket);
             throw StreamException("Cannot receive message", errno);
@@ -50,6 +53,6 @@ void FrameReceiver::receiveFrame()
     }
 
     // Show the frame
-    cv::Mat frame = cv::imdecode(compressed_frame, cv::IMREAD_UNCHANGED);
+    cv::Mat frame = cv::imdecode(cv::Mat(1, frame_size, CV_8UC1, compressed_frame), cv::IMREAD_UNCHANGED);
     showImage(frame, name.get());
 }

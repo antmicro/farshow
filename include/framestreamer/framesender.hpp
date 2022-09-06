@@ -1,6 +1,7 @@
 #pragma once
 
 #include "framestreamer/udpinterface.hpp"
+#include <opencv2/imgcodecs.hpp>
 
 class FrameSender : public UdpInterface
 {
@@ -25,4 +26,6 @@ public:
     void sendFrame(cv::Mat frame);
 
     std::string stream_name; ///< name of the stream
+
+    unsigned frame_parts_delay = 500; ///< Amount of sleep time in microseconds between sending frame parts
 };
