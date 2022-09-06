@@ -16,16 +16,16 @@ void showImage(cv::Mat frame, std::string winName)
     cv::waitKey(0);
 }
 
-FrameStreamer::FrameStreamer(std::string clientIp, int clientPort, int serverPort, std::string serverIp)
+FrameStreamer::FrameStreamer(std::string client_ip, int client_port, int server_port, std::string server_ip)
 {
     // Create address structures
     serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(serverPort);
-    serverAddr.sin_addr.s_addr = (serverIp == "" ? htonl(INADDR_ANY) : inet_addr(serverIp.c_str()));
+    serverAddr.sin_port = htons(server_port);
+    serverAddr.sin_addr.s_addr = (server_ip == "" ? htonl(INADDR_ANY) : inet_addr(server_ip.c_str()));
 
     clientAddr.sin_family = AF_INET;
-    clientAddr.sin_port = htons(clientPort);
-    clientAddr.sin_addr.s_addr = inet_addr(clientIp.c_str());
+    clientAddr.sin_port = htons(client_port);
+    clientAddr.sin_addr.s_addr = inet_addr(client_ip.c_str());
 
     // Create and bind the socket
     serverSocket = socket(PF_INET, SOCK_DGRAM, 0);
@@ -44,16 +44,18 @@ FrameStreamer::FrameStreamer(std::string clientIp, int clientPort, int serverPor
 void FrameStreamer::sendFrame(cv::Mat frame)
 {
     // Create a message
-    struct FrameMessage msg;
+    FrameMessage msg;
+
+    std::cout << "Created " << sizeof(FrameMessage) << std::endl;
 
     strcpy(msg.data, stream_name.c_str());
-    msg.name_length = sizeof(stream_name.c_str());
-    msg.frame_id = 0;
-    msg.part_id = 0;
+    msg.header.name_length = sizeof(stream_name.c_str());
+    msg.header.frame_id = 0;
+    msg.header.part_id = 0;
 
     // Compress the image
     std::vector<uchar> compressed_frame;
-    int available_space = DATAGRAM_SIZE - msg.name_length - 4 * sizeof(short int) - 1;
+    int available_space = DATAGRAM_SIZE - msg.header.name_length - sizeof(FrameHeader) - 3;
 
     cv::imencode(".jpg", frame, compressed_frame, {cv::IMWRITE_JPEG_QUALITY, 95});
 
@@ -62,12 +64,12 @@ void FrameStreamer::sendFrame(cv::Mat frame)
     if (compressed_frame.size() <= available_space)
     {
         // Will fit one message
-        msg.total_parts = 1;
+        msg.header.total_parts = 1;
     }
     else
     {
         // Split frame to parts
-        msg.total_parts = std::ceil((float)compressed_frame.size() / available_space);
+        msg.header.total_parts = std::ceil((float)compressed_frame.size() / available_space);
     }
 
     // Send parts
@@ -75,7 +77,7 @@ void FrameStreamer::sendFrame(cv::Mat frame)
 
     while (position <= compressed_frame.data() + compressed_frame.size())
     {
-        memcpy(msg.data + msg.name_length, position, available_space);
+        memcpy(msg.data + msg.header.name_length, position, available_space);
         if (sendto(serverSocket, &msg, sizeof(msg), 0, (const struct sockaddr *)&clientAddr, sizeof(clientAddr)) < 0)
         {
             close(serverSocket);
@@ -83,9 +85,9 @@ void FrameStreamer::sendFrame(cv::Mat frame)
         }
         else
         {
-            std::cout << "Sent part " << msg.part_id + 1 << "/" << msg.total_parts << std::endl;
+            std::cout << "Sent part " << msg.header.part_id + 1 << "/" << msg.header.total_parts << std::endl;
         }
-        msg.part_id++;
+        msg.header.part_id++;
         position += available_space;
     }
 }
@@ -94,7 +96,7 @@ void FrameStreamer::receiveFrame()
 {
     unsigned int addr_size = sizeof(clientAddr);
 
-    struct FrameMessage msg;
+    FrameMessage msg;
 
     // Check stream name and number of parts
     if (recvfrom(serverSocket, &msg, sizeof(msg), MSG_WAITALL | MSG_PEEK, (struct sockaddr *)&clientAddr, &addr_size) < 0)
@@ -103,15 +105,15 @@ void FrameStreamer::receiveFrame()
         throw StreamException("Cannot receive message", errno);
     }
 
-    std::unique_ptr<char> name = std::make_unique<char>(msg.name_length);
+    std::unique_ptr<char> name = std::make_unique<char>(msg.header.name_length);
     strcpy(name.get(), msg.data);
 
     // Wait for data
-    int part_size = DATAGRAM_SIZE - 4 * sizeof(short int) - 1 - msg.name_length;
-    std::vector<unsigned char> compressed_frame(msg.total_parts * part_size);
+    int part_size = DATAGRAM_SIZE - sizeof(FrameHeader) - 1 - msg.header.name_length;
+    std::vector<unsigned char> compressed_frame(msg.header.total_parts * part_size);
     unsigned char *position = compressed_frame.data();
 
-    for (int i = 0; i < msg.total_parts; i++)
+    for (int i = 0; i < msg.header.total_parts; i++)
     {
         if (recvfrom(serverSocket, &msg, sizeof(msg), MSG_WAITALL, (struct sockaddr *)&clientAddr, &addr_size) < 0)
         {
@@ -120,9 +122,9 @@ void FrameStreamer::receiveFrame()
         }
         else
         {
-            std::cout << "received part " << msg.part_id + 1 << "/" << msg.total_parts << std::endl;
+            std::cout << "received part " << msg.header.part_id + 1 << "/" << msg.header.total_parts << std::endl;
         }
-        memcpy(position, msg.data + msg.name_length, part_size);
+        memcpy(position, msg.data + msg.header.name_length, part_size);
         position += part_size;
     }
 
