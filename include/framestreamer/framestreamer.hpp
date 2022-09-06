@@ -49,22 +49,8 @@ public:
      */
     ~FrameStreamer();
 
-    /**
-     * Encode the frame and send it (in parts if it's too big to fit the datagram).
-     *
-     * @param frame Frame to send
-     */
-    void sendFrame(cv::Mat frame);
-
-    /**
-     * Receive and display the frame
-     */
-    void receiveFrame();
-
-    std::string stream_name; ///< name of the stream
-
-private:
+protected:
     struct sockaddr_in serverAddr; ///< Server's ip address structure
     struct sockaddr_in clientAddr; ///< Client's ip address structure
-    int serverSocket;              ///< Socket binded to server address
+    int serverSocket;              ///< Socket binded to server address //TODO: rename
 };
