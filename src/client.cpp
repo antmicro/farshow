@@ -17,6 +17,7 @@ int main()
         throw StreamException("Cannot read image\n");
     }
 
-    streamer.sendFrame(frame);
+    streamer.sendFrame(frame, ".png", {cv::IMWRITE_PNG_COMPRESSION, 0});
+    // streamer.sendFrame(frame, ".jpg", {cv::IMWRITE_JPEG_QUALITY, 100});
     return 0;
 }

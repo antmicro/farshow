@@ -38,7 +38,6 @@ void FrameReceiver::receiveFrame()
 
     for (int i = 0; i < msg.header.total_parts; i++)
     {
-        std::cout << "waiting for msg\n";
         if (recv(mySocket, &msg, sizeof(msg), 0) < 0)
         {
             close(mySocket);

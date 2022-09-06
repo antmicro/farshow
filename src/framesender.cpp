@@ -6,7 +6,7 @@
 #include <opencv2/imgcodecs.hpp>
 #include <unistd.h>
 
-void FrameSender::sendFrame(cv::Mat frame)
+void FrameSender::sendFrame(cv::Mat frame, std::string extension, std::vector<int> encoding_params)
 {
     // Create a message
     FrameMessage msg;
@@ -22,7 +22,7 @@ void FrameSender::sendFrame(cv::Mat frame)
     std::vector<uchar> compressed_frame;
     unsigned available_space = DATAGRAM_SIZE - msg.header.name_length - sizeof(FrameHeader) - 3;
 
-    cv::imencode(".jpg", frame, compressed_frame, {cv::IMWRITE_JPEG_QUALITY, 95});
+    cv::imencode(extension, frame, compressed_frame, encoding_params);
 
     showImage(frame, "Before sending");
 
