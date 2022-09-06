@@ -1,4 +1,4 @@
-#include "framestreamer/framestreamer.hpp"
+#include "framestreamer/udpinterface.hpp"
 #include "framestreamer/streamexception.hpp"
 
 #include <iostream>
@@ -6,8 +6,7 @@
 #include <opencv2/imgcodecs.hpp>
 #include <unistd.h>
 
-
-FrameStreamer::FrameStreamer(std::string server_ip, int server_port)
+UdpInterface::UdpInterface(std::string server_ip, int server_port)
 {
     // Create server address structure
     serverAddr.sin_family = AF_INET;
@@ -22,4 +21,4 @@ FrameStreamer::FrameStreamer(std::string server_ip, int server_port)
     }
 }
 
-FrameStreamer::~FrameStreamer() { close(mySocket); }
+UdpInterface::~UdpInterface() { close(mySocket); }

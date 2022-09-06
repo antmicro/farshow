@@ -1,5 +1,5 @@
-#include <framestreamer/framesender.hpp>
 #include "framestreamer/streamexception.hpp"
+#include <framestreamer/framesender.hpp>
 #include <iostream>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgcodecs.hpp>
@@ -10,8 +10,7 @@
 
 int main()
 {
-    FrameSender streamer = FrameSender("127.0.0.1");
-    streamer.stream_name = "test";
+    FrameSender streamer = FrameSender("test", "127.0.0.1");
     cv::Mat frame = cv::imread("../test_image.jpg");
     if (frame.empty())
     {

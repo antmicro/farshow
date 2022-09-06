@@ -11,7 +11,7 @@ include_directories(
 )
 
 add_library(${PROJECT_NAME} SHARED
-    src/framestreamer.cpp
+    src/udpinterface.cpp
     src/framesender.cpp
     src/framereceiver.cpp
     src/utils.cpp

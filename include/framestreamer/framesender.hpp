@@ -1,15 +1,21 @@
-#include "framestreamer/framestreamer.hpp"
+#pragma once
 
-class FrameSender : public FrameStreamer
+#include "framestreamer/udpinterface.hpp"
+
+class FrameSender : public UdpInterface
 {
 public:
     /**
      * Fill server address structure and create a socket
      *
+     * @param stream_name Title of the stream.
      * @param server_ip Ip address of the server to which data will be sent
      * @param server_port Port of the server
      */
-    FrameSender(std::string server_address, int server_port = 1100) : FrameStreamer(server_address, server_port) {}
+    FrameSender(std::string stream_name, std::string server_address, int server_port = 1100)
+        : UdpInterface(server_address, server_port), stream_name(stream_name)
+    {
+    }
 
     /**
      * Encode the frame and send it (in parts if it's too big to fit the datagram).

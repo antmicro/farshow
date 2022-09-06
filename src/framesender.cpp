@@ -1,6 +1,6 @@
 #include "framestreamer/framesender.hpp"
-#include "framestreamer/utils.hpp"
 #include "framestreamer/streamexception.hpp"
+#include "framestreamer/utils.hpp"
 
 #include <iostream>
 #include <opencv2/imgcodecs.hpp>

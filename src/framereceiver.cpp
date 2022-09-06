@@ -6,7 +6,7 @@
 #include <opencv2/imgcodecs.hpp>
 #include <unistd.h>
 
-FrameReceiver::FrameReceiver(std::string server_address, int server_port) : FrameStreamer(server_address, server_port)
+FrameReceiver::FrameReceiver(std::string server_address, int server_port) : UdpInterface(server_address, server_port)
 {
     if (bind(mySocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) == -1)
     {

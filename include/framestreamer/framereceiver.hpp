@@ -1,6 +1,7 @@
-#include "framestreamer/framestreamer.hpp"
+#pragma once
+#include "framestreamer/udpinterface.hpp"
 
-class FrameReceiver : public FrameStreamer
+class FrameReceiver : public UdpInterface
 {
 public:
     /**
