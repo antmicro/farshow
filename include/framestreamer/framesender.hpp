@@ -4,14 +4,12 @@ class FrameSender : public FrameStreamer
 {
 public:
     /**
-     * Fill address structures, create socket and bind it.
+     * Fill server address structure and create a socket
      *
-     * @param client_ip Client's ip address
-     * @param client_port Client's port
-     * @param server_port Server's port
-     * @param server_ip Server's ip address (if not provided, binds the socket to all available interfaces)
+     * @param server_ip Ip address of the server to which data will be sent
+     * @param server_port Port of the server
      */
-    FrameSender(std::string client_ip, int client_port, int my_port = 1100, std::string my_address = "") : FrameStreamer(client_ip, client_port, my_port, my_address) {};
+    FrameSender(std::string server_address, int server_port = 1100) : FrameStreamer(server_address, server_port) {}
 
     /**
      * Encode the frame and send it (in parts if it's too big to fit the datagram).
@@ -21,5 +19,4 @@ public:
     void sendFrame(cv::Mat frame);
 
     std::string stream_name; ///< name of the stream
-private:
 };

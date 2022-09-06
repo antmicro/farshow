@@ -6,16 +6,23 @@
 #include <opencv2/imgcodecs.hpp>
 #include <unistd.h>
 
+FrameReceiver::FrameReceiver(std::string server_address, int server_port) : FrameStreamer(server_address, server_port)
+{
+    if (bind(mySocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) == -1)
+    {
+        close(mySocket);
+        throw StreamException("Cannot bind", errno);
+    }
+}
+
 void FrameReceiver::receiveFrame()
 {
-    unsigned int addr_size = sizeof(clientAddr);
-
     FrameMessage msg;
 
     // Check stream name and number of parts
-    if (recvfrom(serverSocket, &msg, sizeof(msg), MSG_WAITALL | MSG_PEEK, (struct sockaddr *)&clientAddr, &addr_size) < 0)
+    if (recv(mySocket, &msg, sizeof(msg), MSG_WAITALL | MSG_PEEK) < 0)
     {
-        close(serverSocket);
+        close(mySocket);
         throw StreamException("Cannot receive message", errno);
     }
 
@@ -29,9 +36,9 @@ void FrameReceiver::receiveFrame()
 
     for (int i = 0; i < msg.header.total_parts; i++)
     {
-        if (recvfrom(serverSocket, &msg, sizeof(msg), MSG_WAITALL, (struct sockaddr *)&clientAddr, &addr_size) < 0)
+        if (recv(mySocket, &msg, sizeof(msg), MSG_WAITALL) < 0)
         {
-            close(serverSocket);
+            close(mySocket);
             throw StreamException("Cannot receive message", errno);
         }
         else

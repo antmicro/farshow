@@ -35,14 +35,12 @@ class FrameStreamer
 {
 public:
     /**
-     * Fill address structures, create socket and bind it.
+     * Fill server address structure and create a socket
      *
-     * @param client_ip Client's ip address
-     * @param client_port Client's port
      * @param server_port Server's port
      * @param server_ip Server's ip address (if not provided, binds the socket to all available interfaces)
      */
-    FrameStreamer(std::string client_ip, int client_port, int my_port = 1100, std::string my_address = "");
+    FrameStreamer(std::string server_address = "", int server_port = 1100);
 
     /*
      * Close the socket
@@ -51,6 +49,5 @@ public:
 
 protected:
     struct sockaddr_in serverAddr; ///< Server's ip address structure
-    struct sockaddr_in clientAddr; ///< Client's ip address structure
-    int serverSocket;              ///< Socket binded to server address //TODO: rename
+    int mySocket;              ///< Socket binded to server address //TODO: rename
 };
