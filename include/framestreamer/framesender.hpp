@@ -28,4 +28,6 @@ public:
     std::string stream_name; ///< name of the stream
 
     unsigned frame_parts_delay = 500; ///< Amount of sleep time in microseconds between sending frame parts
+private:
+    unsigned curr_frame_id = 0; ///< Id for the next frame
 };

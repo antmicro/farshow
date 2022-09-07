@@ -1,7 +1,8 @@
 #include "framestreamer/utils.hpp"
-#include <opencv2/highgui.hpp>/**
+#include <opencv2/highgui.hpp>
 
-* Display a window with the image
+/**
+ * Display a window with the image
  */
 void showImage(cv::Mat frame, std::string winName)
 {

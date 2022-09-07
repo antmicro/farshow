@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10.0)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 project(frame-streamer VERSION 0.1)
 
@@ -34,9 +34,6 @@ target_link_libraries(server PUBLIC
     ${OpenCV_LIBS}
 )
 
-
-add_compile_options(-Wall -Wextra -pedantic -Werror -o)
-
 add_executable(client
     src/client.cpp
 )
@@ -47,9 +44,13 @@ target_link_libraries(client PRIVATE
 
 target_link_libraries(client PUBLIC
     ${OpenCV_LIBS}
+    v4l2
+    camera-capture
 )
 
-add_compile_options(-Wall -Wextra -pedantic -Werror -o)
+target_compile_options(client PUBLIC -fconcepts)
+
+add_compile_options(-Wall -Wextra -pedantic  -o)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 

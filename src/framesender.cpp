@@ -1,6 +1,5 @@
 #include "framestreamer/framesender.hpp"
 #include "framestreamer/streamexception.hpp"
-#include "framestreamer/utils.hpp"
 
 #include <iostream>
 #include <opencv2/imgcodecs.hpp>
@@ -11,11 +10,9 @@ void FrameSender::sendFrame(cv::Mat frame, std::string extension, std::vector<in
     // Create a message
     FrameMessage msg;
 
-    std::cout << "Created " << sizeof(FrameMessage) << std::endl;
-
     strcpy(msg.data, stream_name.c_str());
     msg.header.name_length = sizeof(stream_name.c_str());
-    msg.header.frame_id = 0;
+    msg.header.frame_id = curr_frame_id++;
     msg.header.part_id = 0;
 
     // Compress the image
@@ -23,8 +20,6 @@ void FrameSender::sendFrame(cv::Mat frame, std::string extension, std::vector<in
     unsigned available_space = DATAGRAM_SIZE - msg.header.name_length - sizeof(FrameHeader) - 3;
 
     cv::imencode(extension, frame, compressed_frame, encoding_params);
-
-    showImage(frame, "Before sending");
 
     if (compressed_frame.size() <= available_space)
     {

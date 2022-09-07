@@ -15,7 +15,7 @@ FrameReceiver::FrameReceiver(std::string server_address, int server_port) : UdpI
     }
 }
 
-void FrameReceiver::receiveFrame()
+Frame FrameReceiver::receiveFrame()
 {
     FrameMessage msg;
 
@@ -51,7 +51,8 @@ void FrameReceiver::receiveFrame()
         position += part_size;
     }
 
-    // Show the frame
-    cv::Mat frame = cv::imdecode(cv::Mat(1, frame_size, CV_8UC1, compressed_frame), cv::IMREAD_UNCHANGED);
-    showImage(frame, name.get());
+    Frame res;
+    res.img = cv::imdecode(cv::Mat(1, frame_size, CV_8UC1, compressed_frame), cv::IMREAD_UNCHANGED);
+    res.name = name.get();
+    return res;
 }

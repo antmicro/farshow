@@ -1,6 +1,12 @@
 #pragma once
 #include "framestreamer/udpinterface.hpp"
 
+typedef struct Frame
+{
+    cv::Mat img;
+    std::string name;
+} Frame;
+
 class FrameReceiver : public UdpInterface
 {
 public:
@@ -15,5 +21,5 @@ public:
     /**
      * Receive and display the frame
      */
-    void receiveFrame();
+    Frame receiveFrame();
 };
