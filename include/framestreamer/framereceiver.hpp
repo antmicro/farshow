@@ -6,18 +6,25 @@
 
 
 /**
+ * Frame ready to show
+ */
+typedef struct Frame
+{
+    std::string name;
+    cv::Mat img;
+} Frame;
+
+
+/**
  * Container for a received frame
  */
-class Frame
+class FrameContainer
 {
  public:
-
-    Frame(){} // TODO: delete
-
     /**
      * Constructor
      */
-    Frame(unsigned id, unsigned total_parts, std::string name, unsigned frame_size): id(id), total_parts(total_parts), added_parts(0), name(name)
+    FrameContainer(unsigned id, unsigned total_parts, std::string name, unsigned frame_size): id(id), total_parts(total_parts), added_parts(0), name(name)
     {
         img = cv::Mat(1, frame_size, CV_8UC1);
     }
@@ -61,12 +68,18 @@ private:
     FrameMessage receiveFramePart();
 
     /**
+     * Delete uncomplete frames before this frame, and decode the frame
+     *
+     * @frame Iterator to the complete frame
+     */
+    cv::Mat prepareToShow(std::forward_list<FrameContainer>::iterator frame);
+
+    /**
      * Assign the frame part to a proper frame in a proper stream
      *
      * @param frame_part Frame part to add
      */
-    void addPart(FrameMessage frame_part);
+    std::forward_list<FrameContainer>::iterator addPart(FrameMessage frame_part); //TODO: id overflow support
 
-    std::unordered_map<std::string, std::forward_list<Frame>> streams; ///< All available streams mapped to their frames. The frames are sorted by id.
-    // TODO: store only uncompleted frames
+    std::unordered_map<std::string, std::forward_list<FrameContainer>> streams; ///< All available streams mapped to their uncomplete frames. The frames are sorted by id.
 };

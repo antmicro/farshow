@@ -16,7 +16,7 @@
  * Client is e.g. and embeeded device. It streams the frames
  */
 
-int main()
+int main(int argc, char** argv)
 {
     v4l2_open("asfd", 02); // BUG: it's needed to make v4l2 work with cmake (needed for camera-capture)
     int width = 960;
@@ -27,7 +27,7 @@ int main()
     camera.setConverter(converter);
     cv::Mat frame;
 
-    FrameSender streamer = FrameSender("test", "127.0.0.1");
+    FrameSender streamer = FrameSender(argv[1], "127.0.0.1");
 
     // streamer.sendFrame(frame, ".png", {cv::IMWRITE_PNG_COMPRESSION, 0});
     while (1)

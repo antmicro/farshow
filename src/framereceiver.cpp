@@ -6,9 +6,9 @@
 #include <opencv2/imgcodecs.hpp>
 #include <unistd.h>
 
-void printList(std::forward_list<Frame> &stream)
+void printList(std::forward_list<FrameContainer> &stream)
 {
-     std::cout << (*stream.begin()).name << ": ";
+     std::cout << stream.begin()->name << ": ";
 
      for (auto const &i: stream)
      {
@@ -47,7 +47,16 @@ FrameMessage FrameReceiver::receiveFramePart()
     return msg;
 }
 
-void FrameReceiver::addPart(FrameMessage msg)
+cv::Mat FrameReceiver::prepareToShow(std::forward_list<FrameContainer>::iterator frame)
+{
+    // delete previous, uncomplete frames
+    streams[frame->name].erase_after(streams[frame->name].before_begin(), frame);
+
+    // decode the frame
+    return cv::imdecode((*frame).img, cv::IMREAD_UNCHANGED);
+}
+
+std::forward_list<FrameContainer>::iterator FrameReceiver::addPart(FrameMessage msg)
 {
     unsigned part_size = DATAGRAM_SIZE - sizeof(FrameHeader) - 3 - msg.header.name_length;
 
@@ -61,18 +70,18 @@ void FrameReceiver::addPart(FrameMessage msg)
 
     if (!streams[name.get()].empty())
     {
-        while (itr != streams[name.get()].end() && (*itr).id < msg.header.frame_id)
+        while (itr != streams[name.get()].end() && itr->id < msg.header.frame_id)
         {
             prev = itr;
             itr++;
         }
     }
-    if(itr == streams[name.get()].end() || (*itr).id > msg.header.frame_id)
+    if(itr == streams[name.get()].end() || itr->id > msg.header.frame_id)
     {
         std::cout << "New frame\n";
         // Create a new frame
         unsigned frame_size = msg.header.total_parts * part_size;
-        Frame frame = Frame(msg.header.frame_id, msg.header.total_parts, name.get(), frame_size);
+        FrameContainer frame = FrameContainer(msg.header.frame_id, msg.header.total_parts, name.get(), frame_size);
         if (itr == streams[name.get()].begin())
         {
             streams[name.get()].emplace_front(frame);
@@ -86,15 +95,28 @@ void FrameReceiver::addPart(FrameMessage msg)
     printList(streams[name.get()]);
 
     // Copy image data to the frame pointed by iterator
-    memcpy((*itr).img.data + msg.header.part_id * part_size, msg.data + msg.header.name_length, part_size);
+    memcpy(itr->img.data + msg.header.part_id * part_size, msg.data + msg.header.name_length, part_size);
+    itr->added_parts++;
 
-    showImage(cv::imdecode((*itr).img, cv::IMREAD_UNCHANGED), "stream");
+    return itr;
 }
 
 Frame FrameReceiver::receiveFrame()
 {
-    FrameMessage frame_part = receiveFramePart();
-    addPart(frame_part);
-    // checkFull();
-    return Frame();
+    FrameMessage frame_part;
+    std::forward_list<FrameContainer>::iterator frame;
+
+    while (1)
+    {
+        FrameMessage frame_part = receiveFramePart();
+        auto frame = addPart(frame_part);
+
+        if ((*frame).isComplete())
+        {
+            Frame res;
+            res.img = prepareToShow(frame);
+            res.name = frame->name;
+            return res;
+        }
+    }
 }
