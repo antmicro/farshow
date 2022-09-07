@@ -1,7 +1,7 @@
 #pragma once
 #include "framestreamer/udpinterface.hpp"
 #include <unordered_map>
-#include <forward_list>
+#include <list>
 #include <iostream>
 
 
@@ -72,14 +72,14 @@ private:
      *
      * @frame Iterator to the complete frame
      */
-    cv::Mat prepareToShow(std::forward_list<FrameContainer>::iterator frame);
+    cv::Mat prepareToShow(std::list<FrameContainer>::iterator frame);
 
     /**
      * Assign the frame part to a proper frame in a proper stream
      *
      * @param frame_part Frame part to add
      */
-    std::forward_list<FrameContainer>::iterator addPart(FrameMessage frame_part); //TODO: id overflow support
+    std::list<FrameContainer>::iterator addPart(FrameMessage frame_part); //TODO: id overflow support
 
-    std::unordered_map<std::string, std::forward_list<FrameContainer>> streams; ///< All available streams mapped to their uncomplete frames. The frames are sorted by id.
+    std::unordered_map<std::string, std::list<FrameContainer>> streams; ///< All available streams mapped to their uncomplete frames. The frames are sorted by id.
 };

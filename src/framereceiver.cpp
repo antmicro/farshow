@@ -6,7 +6,7 @@
 #include <opencv2/imgcodecs.hpp>
 #include <unistd.h>
 
-void printList(std::forward_list<FrameContainer> &stream)
+void printList(std::list<FrameContainer> &stream)
 {
      std::cout << stream.begin()->name << ": ";
 
@@ -41,23 +41,25 @@ FrameMessage FrameReceiver::receiveFramePart()
     }
     else
     {
-        std::cout << "received part " << msg.header.part_id + 1 << "/" << msg.header.total_parts << std::endl;
+        std::cout << "received part " << msg.header.part_id + 1 << "/" << msg.header.total_parts  << " of frame " << msg.header.frame_id<< std::endl;
     }
 
     return msg;
 }
 
-cv::Mat FrameReceiver::prepareToShow(std::forward_list<FrameContainer>::iterator frame)
+cv::Mat FrameReceiver::prepareToShow(std::list<FrameContainer>::iterator frame)
 {
     // delete previous, uncomplete frames
-    streams[frame->name].erase_after(streams[frame->name].before_begin(), frame);
+    streams[frame->name].erase(streams[frame->name].begin(), frame);
 
     // decode the frame
     return cv::imdecode((*frame).img, cv::IMREAD_UNCHANGED);
 }
 
-std::forward_list<FrameContainer>::iterator FrameReceiver::addPart(FrameMessage msg)
+std::list<FrameContainer>::iterator FrameReceiver::addPart(FrameMessage msg)
 {
+    std::cout<< "-------------------------\nAdd part " << msg.header.frame_id << "\n";
+
     unsigned part_size = DATAGRAM_SIZE - sizeof(FrameHeader) - 3 - msg.header.name_length;
 
     // Get stream name
@@ -66,14 +68,22 @@ std::forward_list<FrameContainer>::iterator FrameReceiver::addPart(FrameMessage 
 
     // Find a frame
     auto itr = streams[name.get()].begin();
-    auto prev = itr;
 
     if (!streams[name.get()].empty())
     {
-        while (itr != streams[name.get()].end() && itr->id < msg.header.frame_id)
+        while (itr != streams[name.get()].end() && itr->id < msg.header.frame_id) { itr++; }
+
+        // Check id overflow
+        // If there's a "large gap" (I've set it to UINT_MAX/4) between new frame's id and its successor's id, add the frame in the end (after the frames with very large id's)
+        if(itr != streams[name.get()].end() && itr->id - msg.header.frame_id > UINT_MAX/4)
         {
-            prev = itr;
-            itr++;
+            std::cout << "overflow\n";
+            // Look for the proper place from the end
+            itr = streams[name.get()].end();
+            while (std::prev(itr)->id < UINT_MAX * 3/4 && std::prev(itr)->id >= msg.header.frame_id)
+            {
+                itr--;
+            }
         }
     }
     if(itr == streams[name.get()].end() || itr->id > msg.header.frame_id)
@@ -82,15 +92,7 @@ std::forward_list<FrameContainer>::iterator FrameReceiver::addPart(FrameMessage 
         // Create a new frame
         unsigned frame_size = msg.header.total_parts * part_size;
         FrameContainer frame = FrameContainer(msg.header.frame_id, msg.header.total_parts, name.get(), frame_size);
-        if (itr == streams[name.get()].begin())
-        {
-            streams[name.get()].emplace_front(frame);
-            itr = streams[name.get()].begin();
-        }
-        else
-        {
-            itr = streams[name.get()].insert_after(prev, frame);
-        }
+        itr = streams[name.get()].insert(itr, frame);
     }
     printList(streams[name.get()]);
 
@@ -104,7 +106,7 @@ std::forward_list<FrameContainer>::iterator FrameReceiver::addPart(FrameMessage 
 Frame FrameReceiver::receiveFrame()
 {
     FrameMessage frame_part;
-    std::forward_list<FrameContainer>::iterator frame;
+    std::list<FrameContainer>::iterator frame;
 
     while (1)
     {

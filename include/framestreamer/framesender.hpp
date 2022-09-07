@@ -29,5 +29,5 @@ public:
 
     unsigned frame_parts_delay = 500; ///< Amount of sleep time in microseconds between sending frame parts
 private:
-    unsigned curr_frame_id = 0; ///< Id for the next frame
+    unsigned curr_frame_id = 4294967290; ///< Id for the next frame
 };
