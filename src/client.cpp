@@ -33,7 +33,7 @@ int main()
     while (1)
     {
         frame = camera.capture(CV_8UC2);
-        streamer.sendFrame(frame, ".jpg", {cv::IMWRITE_JPEG_QUALITY, 60});
+        streamer.sendFrame(frame, ".jpg", {cv::IMWRITE_JPEG_QUALITY, 95});
         usleep(41666);
     }
     return 0;
