@@ -49,6 +49,8 @@ target_link_libraries(client PRIVATE
 
 target_link_libraries(client PUBLIC
     ${OpenCV_LIBS}
+    v4l2
+    camera-capture
 )
 
 target_compile_options(client PUBLIC -fconcepts)
@@ -56,4 +58,3 @@ target_compile_options(client PUBLIC -fconcepts)
 add_compile_options(-Wall -Wextra -pedantic  -o)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
