@@ -65,8 +65,7 @@ std::list<FrameContainer>::iterator FrameReceiver::addPart(FrameMessage msg)
 
     if (!streams[name.get()].empty())
     {
-        std::cout << "waiting for msg\n";
-        if (recv(mySocket, &msg, sizeof(msg), 0) < 0)
+        while (itr != streams[name.get()].end() && itr->id < msg.header.frame_id)
         {
             itr++;
         }
