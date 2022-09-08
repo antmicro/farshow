@@ -23,11 +23,12 @@ public:
      *
      * @param frame Frame to send
      */
-    void sendFrame(cv::Mat frame, std::string extension = ".jpg", std::vector<int> encoding_params = {cv::IMWRITE_JPEG_QUALITY, 95});
+    void sendFrame(cv::Mat frame, std::string extension = ".jpg",
+                   std::vector<int> encoding_params = {cv::IMWRITE_JPEG_QUALITY, 95});
 
     std::string stream_name; ///< name of the stream
 
     unsigned frame_parts_delay = 500; ///< Amount of sleep time in microseconds between sending frame parts
 private:
-    unsigned curr_frame_id = 4294967290; ///< Id for the next frame
+    unsigned curr_frame_id = 0; ///< Id for the next frame
 };

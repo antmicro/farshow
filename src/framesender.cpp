@@ -1,8 +1,6 @@
 #include "framestreamer/framesender.hpp"
 #include "framestreamer/streamexception.hpp"
 
-#include <iostream>
-#include <opencv2/imgcodecs.hpp>
 #include <unistd.h>
 
 void FrameSender::sendFrame(cv::Mat frame, std::string extension, std::vector<int> encoding_params)
@@ -17,7 +15,7 @@ void FrameSender::sendFrame(cv::Mat frame, std::string extension, std::vector<in
 
     // Compress the image
     std::vector<uchar> compressed_frame;
-    unsigned available_space = DATAGRAM_SIZE - msg.header.name_length - sizeof(FrameHeader) - 3;
+    unsigned available_space = DATAGRAM_SIZE - msg.header.name_length - sizeof(msg.header) - 3;
 
     cv::imencode(extension, frame, compressed_frame, encoding_params);
 
@@ -49,6 +47,6 @@ void FrameSender::sendFrame(cv::Mat frame, std::string extension, std::vector<in
         }
         msg.header.part_id++;
         position += available_space;
-        usleep (frame_parts_delay);
+        usleep(frame_parts_delay);
     }
 }

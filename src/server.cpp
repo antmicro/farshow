@@ -12,9 +12,9 @@ int main(int argc, char **argv)
     FrameReceiver streamer = FrameReceiver("127.0.0.1");
     Frame frame;
 
-    for (int i=0; i<10; i++)
+    while(1)
     {
         frame = streamer.receiveFrame();
-        // showImage(frame.img, frame.name);
+        showImage(frame.img, frame.name);
     }
 }

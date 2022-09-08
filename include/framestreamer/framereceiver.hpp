@@ -1,9 +1,10 @@
 #pragma once
 #include "framestreamer/udpinterface.hpp"
-#include <unordered_map>
-#include <list>
-#include <iostream>
 
+#include "opencv2/core/hal/interface.h"
+#include "opencv2/core/mat.hpp"
+#include <list>
+#include <unordered_map>
 
 /**
  * Frame ready to show
@@ -14,17 +15,17 @@ typedef struct Frame
     cv::Mat img;
 } Frame;
 
-
 /**
  * Container for a received frame
  */
 class FrameContainer
 {
- public:
+public:
     /**
      * Constructor
      */
-    FrameContainer(unsigned id, unsigned total_parts, std::string name, unsigned frame_size): id(id), total_parts(total_parts), added_parts(0), name(name)
+    FrameContainer(unsigned id, unsigned total_parts, std::string name, unsigned frame_size)
+        : id(id), total_parts(total_parts), added_parts(0), name(name)
     {
         img = cv::Mat(1, frame_size, CV_8UC1);
     }
@@ -32,15 +33,14 @@ class FrameContainer
     /**
      * If the frame has all parts
      */
-    bool isComplete() {return total_parts == added_parts;}
+    bool isComplete() { return total_parts == added_parts; }
 
-    unsigned id; ///< frame id
+    unsigned id;          ///< frame id
     unsigned total_parts; ///< number of parts which we're waiting for
     unsigned added_parts; ///< number of received parts
-    cv::Mat img; ///< the frame data
-    std::string name; ///< stream to which the frame belongs
+    cv::Mat img;          ///< the frame data
+    std::string name;     ///< stream to which the frame belongs
 };
-
 
 /**
  * Receives frames from various streams, handles them and displays
@@ -79,7 +79,7 @@ private:
      *
      * @param frame_part Frame part to add
      */
-    std::list<FrameContainer>::iterator addPart(FrameMessage frame_part); //TODO: id overflow support
+    std::list<FrameContainer>::iterator addPart(FrameMessage frame_part);
 
     std::unordered_map<std::string, std::list<FrameContainer>> streams; ///< All available streams mapped to their uncomplete frames. The frames are sorted by id.
 };

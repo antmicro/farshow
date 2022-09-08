@@ -5,7 +5,7 @@ project(frame-streamer VERSION 0.1)
 
 find_package(OpenCV REQUIRED)
 
-include_directories(
+set(INCLUDE_DIRECTORIES
 	${OpenCV_INCLUDE_DIRS}
 	include
 )
@@ -22,10 +22,13 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
     SOVERSION ${PROJECT_VERSION}
 )
 
+target_include_directories(${PROJECT_NAME} PUBLIC ${INCLUDE_DIRECTORIES})
+
 add_executable(server
     src/server.cpp
 )
 
+target_include_directories(server PUBLIC ${INCLUDE_DIRECTORIES})
 target_link_libraries(server PRIVATE
     ${PROJECT_NAME}
 )
@@ -38,14 +41,14 @@ add_executable(client
     src/client.cpp
 )
 
+target_include_directories(client PUBLIC ${INCLUDE_DIRECTORIES})
 target_link_libraries(client PRIVATE
     ${PROJECT_NAME}
+    camera-capture
 )
 
 target_link_libraries(client PUBLIC
     ${OpenCV_LIBS}
-    v4l2
-    camera-capture
 )
 
 target_compile_options(client PUBLIC -fconcepts)
@@ -54,9 +57,9 @@ add_compile_options(-Wall -Wextra -pedantic  -o)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_custom_target(format
-    COMMAND bash -c "find ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/include -iname \"*.cpp\" -o -iname \"*.hpp\" |xargs clang-tidy -format-style=file -p ${CMAKE_BINARY_DIR} -fix"
-    COMMAND bash -c "find ${CMAKE_SOURCE_DIR} ${CMAKE_INCLUDE_DIR} -iname \"*.cpp\" -o -iname \"*.hpp\"| xargs clang-format --style=file -i"
-    VERBATIM
-)
+# add_custom_target(format
+#     COMMAND bash -c "find ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/include -iname \"*.cpp\" -o -iname \"*.hpp\" |xargs clang-tidy -format-style=file -p ${CMAKE_BINARY_DIR} -fix"
+#     COMMAND bash -c "find ${CMAKE_SOURCE_DIR} ${CMAKE_INCLUDE_DIR} -iname \"*.cpp\" -o -iname \"*.hpp\"| xargs clang-format --style=file -i"
+#     VERBATIM
+# )
 
