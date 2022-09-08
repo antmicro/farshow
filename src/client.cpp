@@ -7,7 +7,7 @@
  * Client receives and shows streams
  */
 
-int main(int argc, char **argv)
+int main(int argc, const char **argv)
 {
     FrameReceiver streamer = FrameReceiver("127.0.0.1");
     Frame frame;
