@@ -15,8 +15,9 @@ public:
      * @param stream_name Title of the stream.
      * @param server_address Ip address of the server to which data will be sent
      * @param server_port Port of the server
+     * @param frame_parts_delay Amount of sleep time in microseconds between sending frame parts
      */
-    FrameSender(std::string stream_name, std::string server_address, int server_port = 1100)
+    FrameSender(std::string stream_name, std::string server_address, int server_port = 1100, unsigned frame_parts_delay = 500)
         : UdpInterface(server_address, server_port), stream_name(stream_name)
     {
     }
