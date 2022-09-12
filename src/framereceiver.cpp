@@ -54,8 +54,6 @@ cv::Mat FrameReceiver::prepareToShow(std::list<FrameContainer>::iterator frame)
 
 std::list<FrameContainer>::iterator FrameReceiver::addPart(FrameMessage msg)
 {
-    std::cout << "-------------------------\nAdd part " << msg.header.frame_id << "\n";
-
     unsigned part_size = DATAGRAM_SIZE - sizeof(msg.header) - 3 - msg.header.name_length;
 
     // Get stream name
@@ -73,11 +71,13 @@ std::list<FrameContainer>::iterator FrameReceiver::addPart(FrameMessage msg)
         }
 
         // Check id overflow
-        // If there's a "large gap" (I've set it to UINT_MAX/4) between new frame's id and its successor's id, add the
-        // frame in the end (after the frames with very large id's)
+        // When the frame 0 comes after 4294967295, we don't want to place it at the beginning, but in the end, to start
+        // a new lap. To do this we check, whether there's a "large gap" between new frame's id and its successor's id.
+        // If there is, we add the frame in the end (after the frames with very large id's). Because we use UDP, frames'
+        // parts can be late. I've set the size of the "gap" to UINT_MAX/4, to minimize the probability of misplacing
+        // the frame, but this value can be changed later if we'll find a better one.
         if (itr != streams[name.get()].end() && itr->id - msg.header.frame_id > UINT_MAX / 4)
         {
-            std::cout << "overflow\n";
             // Look for the proper place from the end
             itr = streams[name.get()].end();
             while (std::prev(itr)->id < UINT_MAX * 3 / 4 && std::prev(itr)->id >= msg.header.frame_id)
@@ -88,15 +88,11 @@ std::list<FrameContainer>::iterator FrameReceiver::addPart(FrameMessage msg)
     }
     if (itr == streams[name.get()].end() || itr->id > msg.header.frame_id)
     {
-        std::cout << "New frame\n";
         // Create a new frame
         unsigned frame_size = msg.header.total_parts * part_size;
         FrameContainer frame = FrameContainer(msg.header.frame_id, msg.header.total_parts, name.get(), frame_size);
         itr = streams[name.get()].insert(itr, frame);
     }
-    printList(streams[name.get()]);
-    std::cout << std::endl;
-
     // Copy image data to the frame pointed by iterator
     memcpy(itr->img.data + msg.header.part_id * part_size, msg.data + msg.header.name_length, part_size);
     itr->added_parts++;

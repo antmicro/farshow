@@ -3,6 +3,9 @@
 
 /**
  * Display a window with the image
+ *
+ * @param frame Image to display
+ * @param winName Title for the window
  */
 void showImage(cv::Mat frame, std::string winName)
 {
