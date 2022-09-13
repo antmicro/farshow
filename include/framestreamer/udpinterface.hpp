@@ -33,12 +33,12 @@ class UdpInterface
 {
 public:
     /**
-     * Fill server address structure and create a socket
+     * Fill client address structure and create a socket
      *
-     * @param server_port Server's port
-     * @param server_address Server's ip address (if not provided, binds the socket to all available interfaces)
+     * @param client_port Client's port
+     * @param client_address Client's ip address (if not provided, binds the socket to all available interfaces)
      */
-    UdpInterface(std::string server_address = "", int server_port = 1100);
+    UdpInterface(std::string client_address = "", int client_port = 1100);
 
     /*
      * Close the socket
@@ -46,6 +46,6 @@ public:
     ~UdpInterface();
 
 protected:
-    struct sockaddr_in serverAddr; ///< Server's ip address structure
-    int mySocket;                  ///< Socket binded to server address
+    struct sockaddr_in clientAddr; ///< Client's ip address structure
+    int mySocket;                  ///< Socket binded to client address
 };

@@ -31,6 +31,7 @@ add_executable(server
 target_include_directories(server PUBLIC ${INCLUDE_DIRECTORIES})
 target_link_libraries(server PRIVATE
     ${PROJECT_NAME}
+    camera-capture
 )
 
 target_link_libraries(server PUBLIC
@@ -44,7 +45,6 @@ add_executable(client
 target_include_directories(client PUBLIC ${INCLUDE_DIRECTORIES})
 target_link_libraries(client PRIVATE
     ${PROJECT_NAME}
-    camera-capture
 )
 
 target_link_libraries(client PUBLIC

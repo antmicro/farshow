@@ -50,18 +50,18 @@ public:
 };
 
 /**
- * Receives frames from various streams, handles them and displays
+ * Receives frames from a stream, handles them and displays
  */
 class FrameReceiver : public UdpInterface
 {
 public:
     /**
-     * Fill server addres structure, create a socket and bind it.
+     * Fill client addres structure, create a socket and bind it.
      *
-     * @param server_port Server's port
-     * @param server_address Server's ip address (if not provided, binds the socket to all available interfaces)
+     * @param client_port Client's port
+     * @param client_address Client's ip address (if not provided, binds the socket to all available interfaces)
      */
-    FrameReceiver(std::string server_address = "", int server_port = 1100);
+    FrameReceiver(std::string client_address = "", int client_port = 1100);
 
     /**
      * Receive and display the frame

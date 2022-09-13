@@ -3,12 +3,12 @@
 
 #include <unistd.h>
 
-UdpInterface::UdpInterface(std::string server_ip, int server_port)
+UdpInterface::UdpInterface(std::string client_ip, int client_port)
 {
-    // Create server address structure
-    serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(server_port);
-    serverAddr.sin_addr.s_addr = (server_ip == "" ? htonl(INADDR_ANY) : inet_addr(server_ip.c_str()));
+    // Create client address structure
+    clientAddr.sin_family = AF_INET;
+    clientAddr.sin_port = htons(client_port);
+    clientAddr.sin_addr.s_addr = (client_ip == "" ? htonl(INADDR_ANY) : inet_addr(client_ip.c_str()));
 
     // Create the socket
     mySocket = socket(PF_INET, SOCK_DGRAM, 0);

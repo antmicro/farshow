@@ -36,7 +36,7 @@ void FrameSender::sendFrame(cv::Mat frame, std::string extension, std::vector<in
     while (position <= compressed_frame.data() + compressed_frame.size())
     {
         memcpy(msg.data + msg.header.name_length, position, available_space);
-        if (sendto(mySocket, &msg, sizeof(msg), 0, (const struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0)
+        if (sendto(mySocket, &msg, sizeof(msg), 0, (const struct sockaddr *)&clientAddr, sizeof(clientAddr)) < 0)
         {
             close(mySocket);
             throw StreamException("Cannot send", errno);

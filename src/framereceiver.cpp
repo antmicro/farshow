@@ -15,9 +15,9 @@ void printList(std::list<FrameContainer> &stream)
     std::cout << std::endl;
 }
 
-FrameReceiver::FrameReceiver(std::string server_address, int server_port) : UdpInterface(server_address, server_port)
+FrameReceiver::FrameReceiver(std::string client_address, int client_port) : UdpInterface(client_address, client_port)
 {
-    if (bind(mySocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) == -1)
+    if (bind(mySocket, (struct sockaddr *)&clientAddr, sizeof(clientAddr)) == -1)
     {
         close(mySocket);
         throw StreamException("Cannot bind", errno);

@@ -4,21 +4,21 @@
 #include <opencv2/imgcodecs.hpp>
 
 /**
- * Streams frames to the server
+ * Streams frames to the client
  */
 class FrameSender : public UdpInterface
 {
 public:
     /**
-     * Fill server address structure and create a socket
+     * Fill client address structure and create a socket
      *
      * @param stream_name Title of the stream.
-     * @param server_address Ip address of the server to which data will be sent
-     * @param server_port Port of the server
+     * @param client_address Ip address of the client to which data will be sent
+     * @param client_port Port of the client
      * @param frame_parts_delay Amount of sleep time in microseconds between sending frame parts
      */
-    FrameSender(std::string stream_name, std::string server_address, int server_port = 1100, unsigned frame_parts_delay = 500)
-        : UdpInterface(server_address, server_port), stream_name(stream_name)
+    FrameSender(std::string stream_name, std::string client_address, int client_port = 1100, unsigned frame_parts_delay = 500)
+        : UdpInterface(client_address, client_port), stream_name(stream_name)
     {
     }
 
