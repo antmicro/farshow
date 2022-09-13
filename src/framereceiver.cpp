@@ -1,7 +1,8 @@
 #include "framestreamer/framereceiver.hpp"
 #include "framestreamer/streamexception.hpp"
+#include "framestreamer/utils.hpp"
+#include "imgui.h"
 
-#include <opencv2/imgcodecs.hpp>
 #include <unistd.h>
 
 void printList(std::list<FrameContainer> &stream)
@@ -41,15 +42,6 @@ FrameMessage FrameReceiver::receiveFramePart()
     }
 
     return msg;
-}
-
-cv::Mat FrameReceiver::prepareToShow(std::list<FrameContainer>::iterator frame)
-{
-    // delete previous, uncomplete frames
-    streams[frame->name].erase(streams[frame->name].begin(), frame);
-
-    // decode the frame
-    return cv::imdecode((*frame).img, cv::IMREAD_UNCHANGED);
 }
 
 std::list<FrameContainer>::iterator FrameReceiver::addPart(FrameMessage msg)
@@ -100,6 +92,27 @@ std::list<FrameContainer>::iterator FrameReceiver::addPart(FrameMessage msg)
     return itr;
 }
 
+cv::Mat FrameReceiver::prepareToShow(std::list<FrameContainer>::iterator frame)
+{
+    // delete previous, uncomplete frames
+    streams[frame->name].erase(streams[frame->name].begin(), frame);
+
+    // decode the frame
+    return cv::imdecode((*frame).img, cv::IMREAD_UNCHANGED);
+}
+
+Frame FrameReceiver::putFrameTogether(std::list<FrameContainer>::iterator frame_container)
+{
+    Frame frame;
+    frame.img = prepareToShow(frame_container);
+    frame.name = frame_container->name;
+
+    frame.texture = loadTextureFromCVMat(frame.img);
+    IM_ASSERT(frame.texture);
+
+    return frame;
+}
+
 Frame FrameReceiver::receiveFrame()
 {
     FrameMessage frame_part;
@@ -108,14 +121,11 @@ Frame FrameReceiver::receiveFrame()
     while (1)
     {
         FrameMessage frame_part = receiveFramePart();
-        auto frame = addPart(frame_part);
+        frame = addPart(frame_part);
 
         if ((*frame).isComplete())
         {
-            Frame res;
-            res.img = prepareToShow(frame);
-            res.name = frame->name;
-            return res;
+            return putFrameTogether(frame);
         }
     }
 }

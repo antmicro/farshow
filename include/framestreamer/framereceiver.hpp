@@ -1,8 +1,8 @@
 #pragma once
 #include "framestreamer/udpinterface.hpp"
 
-#include "opencv2/core/hal/interface.h"
 #include "opencv2/core/mat.hpp"
+#include <GL/glew.h> //GLuint
 #include <list>
 #include <unordered_map>
 
@@ -11,8 +11,9 @@
  */
 typedef struct Frame
 {
-    std::string name; ///< name of the stream
-    cv::Mat img;      ///< image
+    std::string name;   ///< name of the stream
+    cv::Mat img;        ///< image
+    GLuint texture = 0; ///< image loaded as a texture
 } Frame;
 
 /**
@@ -88,7 +89,16 @@ private:
     cv::Mat prepareToShow(std::list<FrameContainer>::iterator frame);
 
     /**
-     * Assigns the frame part to a proper frame in a proper stream
+     * Delete uncomplete frames before this frame, decode the frame and create a texture with it
+     *
+     * @frame Iterator to the container with a complete image
+     *
+     * @returns Complete frame, ready to show
+     */
+    Frame putFrameTogether(std::list<FrameContainer>::iterator frame_container);
+
+    /**
+     * Assign the frame part to a proper frame in a proper stream
      *
      * @param frame_part Frame part to add
      *
