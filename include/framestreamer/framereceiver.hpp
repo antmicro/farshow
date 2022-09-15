@@ -36,7 +36,7 @@ public:
     }
 
     /**
-     * If the frame has all parts
+     * Tells if the frame has all parts.
      *
      * @returns True if the frame has all parts, false otherwise
      */
@@ -50,13 +50,13 @@ public:
 };
 
 /**
- * Receives frames from a stream, handles them and displays
+ * Class for collecting frames from a stream.
  */
 class FrameReceiver : public UdpInterface
 {
 public:
     /**
-     * Fill client addres structure, create a socket and bind it.
+     * Fills client addres structure, creates a socket and binds it.
      *
      * @param client_port Client's port
      * @param client_address Client's ip address (if not provided, binds the socket to all available interfaces)
@@ -64,7 +64,7 @@ public:
     FrameReceiver(std::string client_address = "", int client_port = 1100);
 
     /**
-     * Receive and display the frame
+     * Receives and displays the frame
      *
      * @returns Frame ready to display
      */
@@ -72,14 +72,14 @@ public:
 
 private:
     /**
-     * Receive a message with a frame part
+     * Receives a message with a frame part
      *
      * @returns Received message with a frame part
      */
     FrameMessage receiveFramePart();
 
     /**
-     * Delete uncomplete frames before this frame, and decode the frame
+     * Deletes uncomplete frames before this frame, and decodes the frame
      *
      * @frame Iterator to the complete frame
      *
@@ -88,7 +88,7 @@ private:
     cv::Mat prepareToShow(std::list<FrameContainer>::iterator frame);
 
     /**
-     * Assign the frame part to a proper frame in a proper stream
+     * Assigns the frame part to a proper frame in a proper stream
      *
      * @param frame_part Frame part to add
      *
