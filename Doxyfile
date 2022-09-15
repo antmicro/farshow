@@ -1,4 +1,4 @@
-PROJECT_NAME     = Frame-streamer
+PROJECT_NAME     = frame-streamer
 OUTPUT_DIRECTORY = html
 WARNINGS         = YES
 WARN_IF_UNDOCUMENTED  = YES
