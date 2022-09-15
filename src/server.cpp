@@ -3,6 +3,7 @@
 #include <unistd.h>
 
 #include "cxxopts/cxxopts.hpp"
+#include "framestreamer/utils.hpp"
 #include <camera-capture/cameracapture.hpp>
 #include <opencv2/imgproc.hpp>
 
@@ -156,6 +157,7 @@ int main(int argc, const char **argv)
     Config config = parseOptions(argc, argv);
     CameraCapture camera = CameraCapture(config.source);
     cv::Mat frame;
+    cv::Mat gray_frame;
 
     FrameSender streamer = FrameSender(config.client_ip, config.client_port);
 
@@ -164,14 +166,11 @@ int main(int argc, const char **argv)
     {
         frame = camera.capture(CV_8UC2);
         streamer.sendFrame(frame, "input", config.extension.extension, config.extension.getEncodingParams());
-        streamer.sendFrame(frame, "input2", config.extension.extension, config.extension.getEncodingParams());
 
-        // cv::blur(frame, frame, cv::Size2i(1,1));
-        // streamer.sendFrame(frame, "blur", config.extension.extension, config.extension.getEncodingParams());
+        cv::blur(frame, frame, cv::Size2i(7, 7));
+        streamer.sendFrame(frame, "blur", config.extension.extension, config.extension.getEncodingParams());
 
-        // cv::cvtColor(frame, frame, cv::COLOR_RGB2GRAY);
-        // cv::adaptiveThreshold(frame, frame, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 11, 2);
-        // streamer.sendFrame(frame, "threshold", config.extension.extension, config.extension.getEncodingParams());
+        cv::cvtColor(frame, gray_frame, cv::COLOR_RGB2GRAY);
 
         usleep(41666);
     }

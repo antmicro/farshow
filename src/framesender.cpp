@@ -35,7 +35,8 @@ void FrameSender::sendFrame(cv::Mat frame, std::string name, std::string extensi
 
     while (position <= compressed_frame.data() + compressed_frame.size())
     {
-        memcpy(msg.data + msg.header.name_length, position, available_space);
+        memcpy(msg.data + msg.header.name_length, position, compressed_frame.size());
+
         if (sendto(mySocket, &msg, sizeof(msg), 0, (const struct sockaddr *)&clientAddr, sizeof(clientAddr)) < 0)
         {
             close(mySocket);
@@ -43,7 +44,7 @@ void FrameSender::sendFrame(cv::Mat frame, std::string name, std::string extensi
         }
         else
         {
-            std::cout << "Sent part " << msg.header.part_id + 1 << "/" << msg.header.total_parts << "of frame " << msg.header.frame_id << " (" << name << ")" << std::endl;
+            std::cout << "Sent part " << msg.header.part_id + 1 << "/" << msg.header.total_parts << " of frame " << msg.header.frame_id << " (" << name << ")" << std::endl;
         }
         msg.header.part_id++;
         position += available_space;

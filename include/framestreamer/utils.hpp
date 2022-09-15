@@ -3,6 +3,7 @@
 #include <opencv2/core/mat.hpp>
 #include <opencv2/highgui.hpp>
 #include <string>
+#include <iostream>
 
 /**
  * Displays a window with the image
