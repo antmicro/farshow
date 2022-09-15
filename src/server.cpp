@@ -98,7 +98,6 @@ Config parseOptions(int argc, char const *argv[])
                              "devices.\nServer is capturing and streaming the frames.");
 
     options.add_options()
-        ("n, name", "Stream name", cxxopts::value(config.stream_name))
         ("i, ip", "IP address of the client, which should receive stream", cxxopts::value(config.client_ip))
         ("p, port", "Port of the client, which will receive stream",
                 cxxopts::value(config.client_port)->default_value("1100"))
@@ -112,12 +111,12 @@ Config parseOptions(int argc, char const *argv[])
 
     options.positional_help("<stream name> <client ip address>");
 
-    std::vector<std::string> required = {"name", "ip"};
+    std::vector<std::string> required = {"ip"};
 
     // Get command line parameters and parse them
     try
     {
-        options.parse_positional({"name", "ip"});
+        options.parse_positional({"ip"});
         result = options.parse(argc, argv);
         checkRequiredArgs(result, required);
         config.extension = img_types[result["extension"].as<std::string>()];
@@ -158,14 +157,22 @@ int main(int argc, const char **argv)
     CameraCapture camera = CameraCapture(config.source);
     cv::Mat frame;
 
-    FrameSender streamer = FrameSender(config.stream_name, config.client_ip, config.client_port);
+    FrameSender streamer = FrameSender(config.client_ip, config.client_port);
 
     std::cout << config.extension.extension << " " << config.extension.quality << std::endl;
     while (1)
     {
         frame = camera.capture(CV_8UC2);
+        streamer.sendFrame(frame, "input", config.extension.extension, config.extension.getEncodingParams());
+        streamer.sendFrame(frame, "input2", config.extension.extension, config.extension.getEncodingParams());
 
-        streamer.sendFrame(frame, config.extension.extension, config.extension.getEncodingParams());
+        // cv::blur(frame, frame, cv::Size2i(1,1));
+        // streamer.sendFrame(frame, "blur", config.extension.extension, config.extension.getEncodingParams());
+
+        // cv::cvtColor(frame, frame, cv::COLOR_RGB2GRAY);
+        // cv::adaptiveThreshold(frame, frame, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 11, 2);
+        // streamer.sendFrame(frame, "threshold", config.extension.extension, config.extension.getEncodingParams());
+
         usleep(41666);
     }
 }

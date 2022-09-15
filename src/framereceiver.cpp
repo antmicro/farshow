@@ -38,7 +38,7 @@ FrameMessage FrameReceiver::receiveFramePart()
     else
     {
         std::cout << "received part " << msg.header.part_id + 1 << "/" << msg.header.total_parts << " of frame "
-                  << msg.header.frame_id << std::endl;
+                  << msg.header.frame_id;
     }
 
     return msg;
@@ -51,6 +51,7 @@ std::list<FrameContainer>::iterator FrameReceiver::addPart(FrameMessage msg)
     // Get stream name
     std::unique_ptr<char> name = std::make_unique<char>(msg.header.name_length);
     strcpy(name.get(), msg.data);
+    std::cout << " (" << name << ")" << std::endl;
 
     // Find a frame
     auto itr = streams[name.get()].begin();

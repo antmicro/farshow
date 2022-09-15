@@ -3,13 +3,13 @@
 
 #include <unistd.h>
 
-void FrameSender::sendFrame(cv::Mat frame, std::string extension, std::vector<int> encoding_params)
+void FrameSender::sendFrame(cv::Mat frame, std::string name, std::string extension, std::vector<int> encoding_params)
 {
     // Create a message
     FrameMessage msg;
 
-    strcpy(msg.data, stream_name.c_str());
-    msg.header.name_length = sizeof(stream_name.c_str());
+    strcpy(msg.data, name.c_str());
+    msg.header.name_length = sizeof(name.c_str());
     msg.header.frame_id = curr_frame_id++;
     msg.header.part_id = 0;
 
@@ -43,7 +43,7 @@ void FrameSender::sendFrame(cv::Mat frame, std::string extension, std::vector<in
         }
         else
         {
-            std::cout << "Sent part " << msg.header.part_id + 1 << "/" << msg.header.total_parts << std::endl;
+            std::cout << "Sent part " << msg.header.part_id + 1 << "/" << msg.header.total_parts << "of frame " << msg.header.frame_id << " (" << name << ")" << std::endl;
         }
         msg.header.part_id++;
         position += available_space;

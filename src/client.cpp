@@ -2,6 +2,7 @@
 #include "framestreamer/streamexception.hpp"
 
 #include "cxxopts/cxxopts.hpp"
+#include "framestreamer/utils.hpp"
 #include "imgui/backends/imgui_impl_glfw.h"
 #include "imgui/backends/imgui_impl_opengl3.h"
 #include "imgui/imgui.h"
@@ -156,9 +157,6 @@ void setupDearImGui(GLFWwindow *window, const char *glsl_version)
  */
 void displayFrame(Frame frame)
 {
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
 
     ImGui::Begin(frame.name.c_str());
     ImGui::Image((void *)(intptr_t)frame.texture, ImVec2(frame.img.cols, frame.img.rows));
@@ -210,6 +208,7 @@ int main(int argc, const char **argv)
     setupDearImGui(window, glsl_version);
 
     FrameReceiver receiver = FrameReceiver(config.ip, config.port);
+    std::unordered_map<std::string, Frame> frames;
     Frame frame;
 
     while (!glfwWindowShouldClose(window))
@@ -217,7 +216,16 @@ int main(int argc, const char **argv)
         glfwPollEvents();
 
         frame = receiver.receiveFrame(); ///< new frame
-        displayFrame(frame);
+        frames[frame.name] = frame;
+
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        for (auto f: frames)
+        {
+            displayFrame(f.second);
+        }
         render(window);
     }
 
