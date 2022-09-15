@@ -4,7 +4,6 @@
 
 #include "cxxopts/cxxopts.hpp"
 #include <camera-capture/cameracapture.hpp>
-#include <camera-capture/frameconverters/raw2yuvconverter.hpp>
 #include <opencv2/imgproc.hpp>
 
 /**
@@ -109,7 +108,6 @@ Config parseOptions(int argc, char const *argv[])
                 cxxopts::value<int>())
         ("s, source", "Filename of a camera device, which will be a stream source",
                 cxxopts::value(config.source)->default_value("/dev/video0"))
-        // ("t, type", "Frame type (allowed values: YUYV, JPG, BGRA, AR24, RGGB, RG12)", cxxopts::value(config.type))
         ("h, help", "Print usage");
 
     options.positional_help("<stream name> <client ip address>");
@@ -158,8 +156,6 @@ int main(int argc, const char **argv)
 {
     Config config = parseOptions(argc, argv);
     CameraCapture camera = CameraCapture(config.source);
-    std::shared_ptr<FrameConverter> converter = std::make_shared<Raw2YuvConverter>(cv::COLOR_YUV2BGR_YUY2); // TODO
-    camera.setConverter(converter);
     cv::Mat frame;
 
     FrameSender streamer = FrameSender(config.stream_name, config.client_ip, config.client_port);
