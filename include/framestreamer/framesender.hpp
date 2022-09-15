@@ -10,7 +10,7 @@ class FrameSender : public UdpInterface
 {
 public:
     /**
-     * Fill client address structure and create a socket
+     * Fills client address structure and create a socket
      *
      * @param stream_name Title of the stream.
      * @param client_address Ip address of the client to which data will be sent
@@ -24,7 +24,7 @@ public:
     }
 
     /**
-     * Encode the frame and send it (in parts if it's too big to fit the datagram).
+     * Encodes the frame and send it (in parts if it's too big to fit the datagram).
      *
      * @param frame Frame to send
      * @param extension Extension determining output format (`.jpg`, `.png` ...)

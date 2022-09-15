@@ -89,7 +89,7 @@ private:
     cv::Mat prepareToShow(std::list<FrameContainer>::iterator frame);
 
     /**
-     * Delete uncomplete frames before this frame, decode the frame and create a texture with it
+     * Deletes uncomplete frames before this frame, decode the frame and create a texture with it
      *
      * @frame Iterator to the container with a complete image
      *
@@ -98,7 +98,7 @@ private:
     Frame putFrameTogether(std::list<FrameContainer>::iterator frame_container);
 
     /**
-     * Assign the frame part to a proper frame in a proper stream
+     * Assigns the frame part to a proper frame in a proper stream
      *
      * @param frame_part Frame part to add
      *

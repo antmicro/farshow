@@ -33,7 +33,7 @@ class UdpInterface
 {
 public:
     /**
-     * Fill client address structure and create a socket
+     * Fills client address structure and create a socket
      *
      * @param client_port Client's port
      * @param client_address Client's ip address (if not provided, binds the socket to all available interfaces)
@@ -41,7 +41,7 @@ public:
     UdpInterface(std::string client_address = "", int client_port = 1100);
 
     /*
-     * Close the socket
+     * Closes the socket
      */
     ~UdpInterface();
 

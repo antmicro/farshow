@@ -5,7 +5,7 @@
 #include <string>
 
 /**
- * Display a window with the image
+ * Displays a window with the image
  *
  * @param frame Image to display
  * @param winName Title for the window
@@ -18,7 +18,7 @@ void showImage(cv::Mat frame, std::string winName)
 }
 
 /**
- * Load an image into a OpenGL texture with common settings
+ * Loads an image into a OpenGL texture with common settings
  *
  * @param mat Matrix to read data from
  */

@@ -27,7 +27,7 @@ public:
 
 private:
     /**
-     * Combine description and error code
+     * Combines description and error code
      * @param text Exception description
      */
     void setMessage(std::string text)
