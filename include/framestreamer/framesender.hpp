@@ -24,6 +24,7 @@ public:
 
     /**
      * Encodes the frame and send it (in parts if it's too big to fit the datagram).
+     * To match the client side, the frame should be send as grayscale or BGR.
      *
      * @param frame Frame to send
      * @param name Title of the stream

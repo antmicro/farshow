@@ -89,7 +89,7 @@ private:
     cv::Mat prepareToShow(std::list<FrameContainer>::iterator frame);
 
     /**
-     * Deletes uncomplete frames before this frame, decode the frame and create a texture with it
+     * Deletes uncomplete frames before this frame, decodes the frame and creates a texture with it. If the frame has 1 channel it's assumed to be grayscale (and it's converted to BGR), otherwise it's treated like BGR.
      *
      * @frame Iterator to the container with a complete image
      *

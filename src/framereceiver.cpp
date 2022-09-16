@@ -108,6 +108,10 @@ Frame FrameReceiver::putFrameTogether(std::list<FrameContainer>::iterator frame_
     frame.img = prepareToShow(frame_container);
     frame.name = frame_container->name;
 
+    if(frame.img.channels() == 1)
+    {
+        cv::cvtColor(frame.img, frame.img, cv::COLOR_GRAY2RGB);
+    }
     frame.texture = loadTextureFromCVMat(frame.img);
     IM_ASSERT(frame.texture);
 
