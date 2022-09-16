@@ -2,6 +2,7 @@
 #include <GL/glew.h>
 #include <opencv2/core/mat.hpp>
 #include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
 #include <string>
 #include <iostream>
 
@@ -41,7 +42,11 @@ GLuint loadTextureFromCVMat(cv::Mat &mat)
 #if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 #endif
+
+    // cv::Mat bgr_mat;
+    // cv::cvtColor(mat, bgr_mat, cv::COLOR_GRAY2BGR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, mat.cols, mat.rows, 0, GL_BGR, GL_UNSIGNED_BYTE, mat.data);
+    // glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, mat.cols, mat.rows, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, mat.data);
 
     return texture;
 }

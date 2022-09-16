@@ -171,6 +171,9 @@ int main(int argc, const char **argv)
         streamer.sendFrame(frame, "blur", config.extension.extension, config.extension.getEncodingParams());
 
         cv::cvtColor(frame, gray_frame, cv::COLOR_RGB2GRAY);
+        cv::adaptiveThreshold(gray_frame, gray_frame, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 11, 2);
+        cv::cvtColor(gray_frame, frame, cv::COLOR_GRAY2RGB);
+        streamer.sendFrame(frame, "thre", config.extension.extension, config.extension.getEncodingParams());
 
         usleep(41666);
     }

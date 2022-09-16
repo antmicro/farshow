@@ -2,9 +2,11 @@
 #include "framestreamer/streamexception.hpp"
 
 #include <unistd.h>
+#include <algorithm>
 
 void FrameSender::sendFrame(cv::Mat frame, std::string name, std::string extension, std::vector<int> encoding_params)
 {
+    std::cout << "send frame " << name.c_str() << " " << sizeof(name.c_str()) <<std::endl;
     // Create a message
     FrameMessage msg;
 
@@ -33,10 +35,11 @@ void FrameSender::sendFrame(cv::Mat frame, std::string name, std::string extensi
     // Send parts
     uchar *position = compressed_frame.data(); // Data not send yet
 
+    unsigned data_size = std::min<unsigned>(compressed_frame.size(), available_space);
+
     while (position <= compressed_frame.data() + compressed_frame.size())
     {
-        memcpy(msg.data + msg.header.name_length, position, compressed_frame.size());
-
+        memcpy(msg.data + msg.header.name_length, position, data_size);
         if (sendto(mySocket, &msg, sizeof(msg), 0, (const struct sockaddr *)&clientAddr, sizeof(clientAddr)) < 0)
         {
             close(mySocket);
