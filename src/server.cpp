@@ -1,6 +1,7 @@
 #include "framestreamer/streamexception.hpp"
 #include <framestreamer/framesender.hpp>
 #include <unistd.h>
+#include <csignal>
 
 #include "cxxopts/cxxopts.hpp"
 #include "framestreamer/utils.hpp"
@@ -10,6 +11,8 @@
 /**
  * Server is e.g. and embeeded device. It streams the frames
  */
+
+bool running; ///< if the server should be running
 
 /**
  * Information about image type in which frames will be streamed
@@ -152,8 +155,15 @@ Config parseOptions(int argc, char const *argv[])
     return config;
 }
 
+void signalHandler( int signum ) {
+    std::cout << "Closing server..." << std::endl;
+    running = false;
+}
+
 int main(int argc, const char **argv)
 {
+    running = true;
+    signal(SIGINT, signalHandler); ///< exit with ^C
     Config config = parseOptions(argc, argv);
     CameraCapture camera = CameraCapture(config.source);
     cv::Mat frame;
@@ -162,7 +172,7 @@ int main(int argc, const char **argv)
     FrameSender streamer = FrameSender(config.client_ip, config.client_port);
 
     std::cout << config.extension.extension << " " << config.extension.quality << std::endl;
-    while (1)
+    while (running)
     {
         frame = camera.capture(CV_8UC2);
         streamer.sendFrame(frame, "input", config.extension.extension, config.extension.getEncodingParams());
