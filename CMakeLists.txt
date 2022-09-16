@@ -6,6 +6,7 @@ project(frame-streamer VERSION 0.1)
 find_package(OpenCV REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
+find_package(Threads)
 
 # set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 # set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
@@ -75,6 +76,7 @@ target_link_libraries(client PUBLIC
     ${OPENGL_LIBRARY}
     GLEW
     glfw
+    ${CMAKE_THREAD_LIBS_INIT}
 )
 
 add_compile_options(-Wall -Wextra -pedantic  -o -g)

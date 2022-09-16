@@ -71,6 +71,13 @@ public:
      */
     Frame receiveFrame();
 
+    /**
+     *Returns the socket used for communication
+     *
+     * @returns Socket used for communication
+     */
+    int getSocket(){return mySocket;}
+
 private:
     /**
      * Receives a message with a frame part
@@ -89,11 +96,11 @@ private:
     cv::Mat prepareToShow(std::list<FrameContainer>::iterator frame);
 
     /**
-     * Deletes uncomplete frames before this frame, decodes the frame and creates a texture with it. If the frame has 1 channel it's assumed to be grayscale (and it's converted to BGR), otherwise it's treated like BGR.
+     * Deletes uncomplete frames before this frame and decodes the frame. If the frame has 1 channel it's assumed to be grayscale (and it's converted to BGR), otherwise it's treated like BGR.
      *
      * @frame Iterator to the container with a complete image
      *
-     * @returns Complete frame, ready to show
+     * @returns Frame (without a texture), ready to show
      */
     Frame putFrameTogether(std::list<FrameContainer>::iterator frame_container);
 

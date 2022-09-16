@@ -3,6 +3,7 @@
 #include "framestreamer/utils.hpp"
 #include "imgui.h"
 
+#include <GLFW/glfw3.h>
 #include <unistd.h>
 
 void printList(std::list<FrameContainer> &stream)
@@ -30,7 +31,7 @@ FrameMessage FrameReceiver::receiveFramePart()
     FrameMessage msg;
 
     // Wait for data
-    if (recv(mySocket, &msg, sizeof(msg), 0) < 0)
+    if (recv(mySocket, &msg, sizeof(msg), 0) <= 0)
     {
         close(mySocket);
         throw StreamException("Cannot receive message", errno);
@@ -112,8 +113,6 @@ Frame FrameReceiver::putFrameTogether(std::list<FrameContainer>::iterator frame_
     {
         cv::cvtColor(frame.img, frame.img, cv::COLOR_GRAY2RGB);
     }
-    frame.texture = loadTextureFromCVMat(frame.img);
-    IM_ASSERT(frame.texture);
 
     return frame;
 }
@@ -130,7 +129,10 @@ Frame FrameReceiver::receiveFrame()
 
         if ((*frame).isComplete())
         {
-            return putFrameTogether(frame);
+            Frame res = putFrameTogether(frame);
+            glfwPostEmptyEvent();
+            return res;
+            // return putFrameTogether(frame);
         }
     }
 }

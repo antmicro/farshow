@@ -2,12 +2,17 @@
 #include "framestreamer/streamexception.hpp"
 
 #include "cxxopts/cxxopts.hpp"
+#include <thread>
+#include <future>
+#include <chrono>
 #include "framestreamer/utils.hpp"
 #include "imgui/backends/imgui_impl_glfw.h"
 #include "imgui/backends/imgui_impl_opengl3.h"
 #include "imgui/imgui.h"
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+
+using namespace std::chrono_literals; // for ms
 
 /**
  * Client receives and shows streams
@@ -155,12 +160,12 @@ void setupDearImGui(GLFWwindow *window, const char *glsl_version)
  *
  * @param frame Frame to display
  */
-void displayFrame(Frame frame)
+void displayFrame(Frame &frame)
 {
-
     ImGui::Begin(frame.name.c_str());
     ImGui::Image((void *)(intptr_t)frame.texture, ImVec2(frame.img.cols, frame.img.rows));
     ImGui::End();
+    std::cout << "Showing " << frame.name << " " << frame.texture << " \n";
 }
 
 /**
@@ -202,22 +207,36 @@ void cleanUp(GLFWwindow *window)
 
 int main(int argc, const char **argv)
 {
+
     Config config = parseOptions(argc, argv); ///< parsed command line arguments
     const char *glsl_version = initGui();
     GLFWwindow *window = createWindow("Frame streamer"); ///< window for displaying the streams
     setupDearImGui(window, glsl_version);
 
     FrameReceiver receiver = FrameReceiver(config.ip, config.port);
-    std::unordered_map<std::string, Frame> frames;
+    std::unordered_map<std::string, Frame> frames; ///< Most recent frames from all streams
     Frame frame;
+    std::future<Frame> future_frame;
+
+    future_frame = std::async(&FrameReceiver::receiveFrame, &receiver); // new thread will recv frame
 
     while (!glfwWindowShouldClose(window))
     {
-        glfwPollEvents();
+        glfwWaitEvents();
 
-        frame = receiver.receiveFrame(); ///< new frame
-        frames[frame.name] = frame;
+        // Event could be an empty event, raised by the async function when the frame is received
+        if(future_frame.wait_for(100ms) == std::future_status::ready)
+        {
+            frame = future_frame.get(); ///< new frame
+            frame.texture = loadTextureFromCVMat(frame.img);
+            IM_ASSERT(frame.texture);
+            frames[frame.name] = frame;
 
+            future_frame = std::async(&FrameReceiver::receiveFrame, &receiver);
+        }
+        // If not, other events are processed automatically
+
+        // Display a new frame, to allow moving and resizing windows, even when streams have stopped
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
@@ -229,6 +248,7 @@ int main(int argc, const char **argv)
         render(window);
     }
 
+    shutdown(receiver.getSocket(), 2); // To stop the child thread, blocked on recv
     cleanUp(window);
     return 0;
 }

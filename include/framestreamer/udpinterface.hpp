@@ -14,7 +14,6 @@ struct FrameHeader
     unsigned frame_id;    ///< id of the frame in this stream
     unsigned part_id;     ///< part id
     unsigned total_parts; ///< How many parts of the frame were send
-    
 };
 
 /**
