@@ -33,7 +33,7 @@ public:
     FrameContainer(unsigned id, unsigned total_parts, std::string name, unsigned frame_size)
         : id(id), total_parts(total_parts), added_parts(0), name(name)
     {
-        img = cv::Mat(1, frame_size, CV_8UC1);
+        img = std::vector<uchar>(frame_size);
     }
 
     /**
@@ -46,7 +46,7 @@ public:
     unsigned id;          ///< frame id
     unsigned total_parts; ///< number of parts which we're waiting for
     unsigned added_parts; ///< number of received parts
-    cv::Mat img;          ///< the frame data
+    std::vector<uchar> img;          ///< the frame data
     std::string name;     ///< stream to which the frame belongs
 };
 
