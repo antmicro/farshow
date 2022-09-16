@@ -6,12 +6,11 @@
 
 void FrameSender::sendFrame(cv::Mat frame, std::string name, std::string extension, std::vector<int> encoding_params)
 {
-    std::cout << "send frame " << name.c_str() << " " << sizeof(name.c_str()) <<std::endl;
     // Create a message
     FrameMessage msg;
 
     strcpy(msg.data, name.c_str());
-    msg.header.name_length = sizeof(name.c_str());
+    msg.header.name_length = name.length() + 1;
     msg.header.frame_id = curr_frame_id++;
     msg.header.part_id = 0;
 

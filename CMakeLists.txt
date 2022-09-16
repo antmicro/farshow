@@ -77,6 +77,6 @@ target_link_libraries(client PUBLIC
     glfw
 )
 
-add_compile_options(-Wall -Wextra -pedantic  -o)
+add_compile_options(-Wall -Wextra -pedantic  -o -g)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
