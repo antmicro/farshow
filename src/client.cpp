@@ -2,15 +2,13 @@
 #include "framestreamer/streamexception.hpp"
 
 #include "cxxopts/cxxopts.hpp"
-#include <thread>
-#include <future>
-#include <chrono>
 #include "framestreamer/utils.hpp"
 #include "imgui/backends/imgui_impl_glfw.h"
 #include "imgui/backends/imgui_impl_opengl3.h"
 #include "imgui/imgui.h"
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <future>
 
 using namespace std::chrono_literals; // for ms
 
@@ -225,7 +223,7 @@ int main(int argc, const char **argv)
         glfwWaitEvents();
 
         // Event could be an empty event, raised by the async function when the frame is received
-        if(future_frame.wait_for(100ms) == std::future_status::ready)
+        if (future_frame.wait_for(100ms) == std::future_status::ready)
         {
             frame = future_frame.get(); ///< new frame
             frame.texture = loadTextureFromCVMat(frame.img);
@@ -241,7 +239,7 @@ int main(int argc, const char **argv)
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        for (auto f: frames)
+        for (auto f : frames)
         {
             displayFrame(f.second);
         }

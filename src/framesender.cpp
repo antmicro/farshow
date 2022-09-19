@@ -1,8 +1,8 @@
 #include "framestreamer/framesender.hpp"
 #include "framestreamer/streamexception.hpp"
 
-#include <unistd.h>
 #include <algorithm>
+#include <unistd.h>
 
 void FrameSender::sendFrame(cv::Mat frame, std::string name, std::string extension, std::vector<int> encoding_params)
 {
@@ -46,7 +46,8 @@ void FrameSender::sendFrame(cv::Mat frame, std::string name, std::string extensi
         }
         else
         {
-            std::cout << "Sent part " << msg.header.part_id + 1 << "/" << msg.header.total_parts << " of frame " << msg.header.frame_id << " (" << name << ")" << std::endl;
+            std::cout << "Sent part " << msg.header.part_id + 1 << "/" << msg.header.total_parts << " of frame "
+                      << msg.header.frame_id << " (" << name << ")" << std::endl;
         }
         msg.header.part_id++;
         position += available_space;

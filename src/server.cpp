@@ -1,10 +1,8 @@
 #include "framestreamer/streamexception.hpp"
-#include <framestreamer/framesender.hpp>
-#include <unistd.h>
 #include <csignal>
+#include <framestreamer/framesender.hpp>
 
 #include "cxxopts/cxxopts.hpp"
-#include "framestreamer/utils.hpp"
 #include <camera-capture/cameracapture.hpp>
 #include <opencv2/imgproc.hpp>
 
@@ -155,7 +153,8 @@ Config parseOptions(int argc, char const *argv[])
     return config;
 }
 
-void signalHandler( int signum ) {
+void signalHandler(int signum)
+{
     std::cout << "Closing server..." << std::endl;
     running = false;
 }

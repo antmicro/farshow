@@ -16,8 +16,7 @@ public:
      * @param client_port Port of the client
      * @param frame_parts_delay Amount of sleep time in microseconds between sending frame parts
      */
-    FrameSender(std::string client_address, int client_port = 1100,
-                unsigned frame_parts_delay = 500)
+    FrameSender(std::string client_address, int client_port = 1100, unsigned frame_parts_delay = 500)
         : UdpInterface(client_address, client_port)
     {
     }

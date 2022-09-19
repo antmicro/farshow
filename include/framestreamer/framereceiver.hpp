@@ -43,11 +43,11 @@ public:
      */
     bool isComplete() { return total_parts == added_parts; }
 
-    unsigned id;          ///< frame id
-    unsigned total_parts; ///< number of parts which we're waiting for
-    unsigned added_parts; ///< number of received parts
-    std::vector<uchar> img;          ///< the frame data
-    std::string name;     ///< stream to which the frame belongs
+    unsigned id;            ///< frame id
+    unsigned total_parts;   ///< number of parts which we're waiting for
+    unsigned added_parts;   ///< number of received parts
+    std::vector<uchar> img; ///< the frame data
+    std::string name;       ///< stream to which the frame belongs
 };
 
 /**
@@ -76,7 +76,7 @@ public:
      *
      * @returns Socket used for communication
      */
-    int getSocket(){return mySocket;}
+    int getSocket() { return mySocket; }
 
 private:
     /**
@@ -96,7 +96,8 @@ private:
     cv::Mat prepareToShow(std::list<FrameContainer>::iterator frame);
 
     /**
-     * Deletes uncomplete frames before this frame and decodes the frame. If the frame has 1 channel it's assumed to be grayscale (and it's converted to BGR), otherwise it's treated like BGR.
+     * Deletes uncomplete frames before this frame and decodes the frame. If the frame has 1 channel it's assumed to be
+     * grayscale (and it's converted to BGR), otherwise it's treated like BGR.
      *
      * @frame Iterator to the container with a complete image
      *
