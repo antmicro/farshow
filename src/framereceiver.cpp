@@ -30,10 +30,17 @@ FrameMessage FrameReceiver::receiveFramePart()
     FrameMessage msg;
 
     // Wait for data
-    if (recv(mySocket, &msg, sizeof(msg), 0) <= 0)
+    int res = recv(mySocket, &msg, sizeof(msg), 0);
+    if (res < 0)
     {
         close(mySocket);
         throw StreamException("Cannot receive message", errno);
+    }
+    else if (res == 0)
+    {
+        // Parent thread's shut the socket down
+        running = false;
+        close(mySocket);
     }
     else
     {
@@ -102,20 +109,6 @@ cv::Mat FrameReceiver::prepareToShow(std::list<FrameContainer>::iterator frame)
     return cv::imdecode((*frame).img, cv::IMREAD_UNCHANGED);
 }
 
-Frame FrameReceiver::putFrameTogether(std::list<FrameContainer>::iterator frame_container)
-{
-    Frame frame;
-    frame.img = prepareToShow(frame_container);
-    frame.name = frame_container->name;
-
-    if (frame.img.channels() == 1)
-    {
-        cv::cvtColor(frame.img, frame.img, cv::COLOR_GRAY2RGB);
-    }
-
-    return frame;
-}
-
 Frame FrameReceiver::receiveFrame()
 {
     FrameMessage frame_part;
@@ -124,14 +117,20 @@ Frame FrameReceiver::receiveFrame()
     while (1)
     {
         FrameMessage frame_part = receiveFramePart();
-        frame = addPart(frame_part);
-
-        if ((*frame).isComplete())
+        if (running)
         {
-            Frame res = putFrameTogether(frame);
+            frame = addPart(frame_part);
+
+            if ((*frame).isComplete())
+            {
+                glfwPostEmptyEvent(); // to unblock parent thread
+                return Frame{frame->name, prepareToShow(frame)};
+            }
+        }
+        else
+        {
             glfwPostEmptyEvent();
-            return res;
-            // return putFrameTogether(frame);
+            return Frame{};
         }
     }
 }

@@ -2,18 +2,17 @@
 #include "framestreamer/udpinterface.hpp"
 
 #include "opencv2/core/mat.hpp"
-#include <GL/glew.h> //GLuint
 #include <list>
 #include <unordered_map>
+#include "imgui/imgui.h"
 
 /**
- * Frame ready to show
+ * Complete frame, ready for return
  */
 typedef struct Frame
 {
     std::string name;   ///< name of the stream
     cv::Mat img;        ///< image
-    GLuint texture = 0; ///< image loaded as a texture
 } Frame;
 
 /**
@@ -96,16 +95,6 @@ private:
     cv::Mat prepareToShow(std::list<FrameContainer>::iterator frame);
 
     /**
-     * Deletes uncomplete frames before this frame and decodes the frame. If the frame has 1 channel it's assumed to be
-     * grayscale (and it's converted to BGR), otherwise it's treated like BGR.
-     *
-     * @frame Iterator to the container with a complete image
-     *
-     * @returns Frame (without a texture), ready to show
-     */
-    Frame putFrameTogether(std::list<FrameContainer>::iterator frame_container);
-
-    /**
      * Assigns the frame part to a proper frame in a proper stream
      *
      * @param frame_part Frame part to add
@@ -117,4 +106,5 @@ private:
     std::unordered_map<std::string, std::list<FrameContainer>> streams; ///< All available streams mapped to their
                                                                         ///< uncomplete frames. The frames are sorted by
                                                                         ///< id.
+    bool running = true; ///< If the socket is still open and the process should run
 };

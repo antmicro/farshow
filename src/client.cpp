@@ -5,16 +5,124 @@
 #include "framestreamer/utils.hpp"
 #include "imgui/backends/imgui_impl_glfw.h"
 #include "imgui/backends/imgui_impl_opengl3.h"
-#include "imgui/imgui.h"
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include <future>
+#include <signal.h>
+#include <thread>
 
-using namespace std::chrono_literals; // for ms
+#define GLSL_VERSION "#version 130"
+
 
 /**
  * Client receives and shows streams
  */
+
+
+/**
+ * Class for handling displaying frames and loading their textures
+ */
+class FrameWindow
+{
+public:
+    /**
+     * Default, empty constructor
+     */
+    FrameWindow(){}
+
+    /**
+     * Constructor. Sets name and image
+     *
+     * @param frame Frame structure – source of the name and image
+     */
+    FrameWindow(Frame &frame): name(frame.name), img(frame.img), changed(true){}
+
+    /**
+     * Replaces img and marks it as changed
+     *
+     * The method can be launched from different thread, so the reloadTexture function is not used. You have to run it manually from the main thread.
+     *
+     * @param new_image New image
+     */
+    void changeImg(cv::Mat &new_image);
+
+    /**
+     * Reloads the texture from the img. Creates a texture handler if it's not present.
+     * If the image has 1 channel it's assumed to be grayscale (and it's converted to BGR), otherwise it's treated like BGR.
+     *
+     * Has to be run from the same thread as `glfwInit` (the main one)
+     */
+    void reloadTexture();
+
+    /**
+     * Prepares Dear ImGui window with the image
+     *
+     * @param frame Frame to display
+     */
+    void display();
+
+    ~FrameWindow();
+
+private:
+    GLuint texture = -1; ///< OpenGL texture identifier
+    std::string name; ///< Window name
+    cv::Mat img; ///< Image to display
+    bool changed = false; ///< If the img has changed since last texture reload
+};
+
+void FrameWindow::reloadTexture()
+{
+    if (texture == -1)
+    {
+        glGenTextures(1, &texture);
+    }
+
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    // Setup filtering parameters for display
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, img.cols, img.rows, 0, GL_BGR, GL_UNSIGNED_BYTE, img.data);
+    IM_ASSERT(texture);
+    changed = false;
+}
+
+void FrameWindow::changeImg(cv::Mat &new_image)
+{
+    if (new_image.channels() == 1)
+    {
+        cv::cvtColor(new_image, img, cv::COLOR_GRAY2RGB);
+    }
+    else
+    {
+        img = new_image;
+    }
+    changed = true;
+}
+
+void FrameWindow::display()
+{
+    if (changed)
+    {
+        reloadTexture();
+    }
+
+    ImGui::Begin(name.c_str(), NULL,  ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+
+    //TODO: resize window
+    // int y = ImGui::GetWindowSize().x * frame.img.rows/ frame.img.cols;
+
+    // ImGui::Image((void *)(intptr_t)frame.texture, ImVec2(ImGui::GetWindowSize().x, y));
+    // ImGui::SetWindowSize(frame.name.c_str(), ImVec2(ImGui::GetWindowSize().x, y));
+    ImGui::Image((void *)(intptr_t)texture, ImVec2(img.cols, img.rows));
+    ImGui::End();
+}
+
+FrameWindow::~FrameWindow()
+{
+    glDeleteTextures(1, &texture);
+}
+
 
 //------------------ COMMAND LINE OPTIONS ----------------------
 /**
@@ -78,9 +186,9 @@ static void glfwErrorCallback(int error, const char *description)
 }
 
 /**
- * Init GLFW and determine glsl version
+ * Initialize GLFW
  */
-const char *initGui()
+void initGui()
 {
     // Setup window
     glfwSetErrorCallback(glfwErrorCallback);
@@ -89,37 +197,16 @@ const char *initGui()
         throw StreamException("Cannot initialize glfw");
     }
 
-    const char *glsl_version;
-// Decide GL+GLSL versions
-#if defined(IMGUI_IMPL_OPENGL_ES2)
-    // GL ES 2.0 + GLSL 100
-    glsl_version = "#version 100";
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
-#elif defined(__APPLE__)
-    // GL 3.2 + GLSL 150
-    glsl_version = "#version 150";
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // 3.2+ only
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);           // Required on Mac
-#else
-    // GL 3.0 + GLSL 130
-    glsl_version = "#version 130";
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-    // glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
-    // glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
-#endif
-
-    return glsl_version;
 }
 
 /**
  * Create window with the size of the screen
  *
  * @param name Window name
+ *
+ * @returns window
  */
 GLFWwindow *createWindow(std::string name)
 {
@@ -139,32 +226,18 @@ GLFWwindow *createWindow(std::string name)
 /**
  * Set context amd backend for Dear ImGui
  */
-void setupDearImGui(GLFWwindow *window, const char *glsl_version)
+void setupDearImGui(GLFWwindow *window)
 {
     // context
     ImGui::CreateContext();
-    // ImGuiIO& io = ImGui::GetIO(); (void)io;
-    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 
     ImGui::StyleColorsDark();
 
     // Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init(glsl_version);
+    ImGui_ImplOpenGL3_Init(GLSL_VERSION);
 }
 
-/**
- * Prepare Dear ImGui window with the image
- *
- * @param frame Frame to display
- */
-void displayFrame(Frame &frame)
-{
-    ImGui::Begin(frame.name.c_str());
-    ImGui::Image((void *)(intptr_t)frame.texture, ImVec2(frame.img.cols, frame.img.rows));
-    ImGui::End();
-    std::cout << "Showing " << frame.name << " " << frame.texture << " \n";
-}
 
 /**
  * Render prepared frames
@@ -203,50 +276,73 @@ void cleanUp(GLFWwindow *window)
     glfwTerminate();
 }
 
+std::unordered_map<std::string, FrameWindow> frames; ///< Most recent frames from all streams
+std::mutex frames_mutex; ///< Mutex for `frames` map. The map is used by main and receiver thread
+int socket_id; ///< Socket on which messages from servers are received
+
+/**
+ * Receive frames and put them in the map
+ *
+ * @param config Configuration from command line arguments
+ */
+void receiveFrames(Config config)
+{
+    FrameReceiver receiver = FrameReceiver(config.ip, config.port);
+    socket_id = receiver.getSocket();
+    Frame frame;
+
+    frame = receiver.receiveFrame();
+    while (!frame.img.empty())
+    {
+        // Place the new frame in the map
+        frames_mutex.lock();
+        try
+        {
+            frames.at(frame.name).changeImg(frame.img);
+        }
+        catch(std::out_of_range e)
+        {
+            frames.insert({frame.name, FrameWindow(frame)});
+        }
+        frames_mutex.unlock();
+
+        frame = receiver.receiveFrame();
+    }
+}
+
+
 int main(int argc, const char **argv)
 {
+    static Config config = parseOptions(argc, argv); ///< parsed command line arguments
 
-    Config config = parseOptions(argc, argv); ///< parsed command line arguments
-    const char *glsl_version = initGui();
+    std::thread receiver_thread = std::thread(receiveFrames, config); ///< thread receiving messages from servers
+
+    initGui();
     GLFWwindow *window = createWindow("Frame streamer"); ///< window for displaying the streams
-    setupDearImGui(window, glsl_version);
-
-    FrameReceiver receiver = FrameReceiver(config.ip, config.port);
-    std::unordered_map<std::string, Frame> frames; ///< Most recent frames from all streams
-    Frame frame;
-    std::future<Frame> future_frame;
-
-    future_frame = std::async(&FrameReceiver::receiveFrame, &receiver); // new thread will recv frame
+    setupDearImGui(window);
 
     while (!glfwWindowShouldClose(window))
     {
-        glfwWaitEvents();
+        glfwPollEvents();
 
-        // Event could be an empty event, raised by the async function when the frame is received
-        if (future_frame.wait_for(100ms) == std::future_status::ready)
-        {
-            frame = future_frame.get(); ///< new frame
-            frame.texture = loadTextureFromCVMat(frame.img);
-            IM_ASSERT(frame.texture);
-            frames[frame.name] = frame;
-
-            future_frame = std::async(&FrameReceiver::receiveFrame, &receiver);
-        }
-        // If not, other events are processed automatically
-
-        // Display a new frame, to allow moving and resizing windows, even when streams have stopped
+        // Display all streams
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        for (auto f : frames)
+        frames_mutex.lock();
+        for (auto &f : frames)
         {
-            displayFrame(f.second);
+            f.second.display();
         }
+        frames_mutex.unlock();
+
         render(window);
     }
 
-    shutdown(receiver.getSocket(), 2); // To stop the child thread, blocked on recv
+    std::cout << "Closing client...\n";
+    shutdown(socket_id, 2); // To stop the child thread, blocked on recv
+    receiver_thread.join();
     cleanUp(window);
     return 0;
 }
