@@ -1,18 +1,18 @@
 #pragma once
 #include "framestreamer/udpinterface.hpp"
 
+#include "imgui/imgui.h"
 #include "opencv2/core/mat.hpp"
 #include <list>
 #include <unordered_map>
-#include "imgui/imgui.h"
 
 /**
  * Complete frame, ready for return
  */
 typedef struct Frame
 {
-    std::string name;   ///< name of the stream
-    cv::Mat img;        ///< image
+    std::string name; ///< name of the stream
+    cv::Mat img;      ///< image
 } Frame;
 
 /**
@@ -86,9 +86,9 @@ private:
     FrameMessage receiveFramePart();
 
     /**
-     * Deletes uncomplete frames before this frame, and decodes the frame
+     * Deletes incomplete frames before this frame, and decodes the frame
      *
-     * @frame Iterator to the complete frame
+     * @param frame Iterator to the complete frame
      *
      * @returns Decoded frame
      */

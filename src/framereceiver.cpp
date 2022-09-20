@@ -3,6 +3,7 @@
 #include "framestreamer/utils.hpp"
 
 #include <GLFW/glfw3.h>
+#include <opencv2/imgcodecs.hpp>
 #include <unistd.h>
 
 void printList(std::list<FrameContainer> &stream)

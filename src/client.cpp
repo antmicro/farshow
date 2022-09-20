@@ -7,16 +7,15 @@
 #include "imgui/backends/imgui_impl_opengl3.h"
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <opencv2/imgproc.hpp>
 #include <signal.h>
 #include <thread>
 
 #define GLSL_VERSION "#version 130"
 
-
 /**
  * Client receives and shows streams
  */
-
 
 /**
  * Class for handling displaying frames and loading their textures
@@ -27,19 +26,20 @@ public:
     /**
      * Default, empty constructor
      */
-    FrameWindow(){}
+    FrameWindow() {}
 
     /**
      * Constructor. Sets name and image
      *
      * @param frame Frame structure – source of the name and image
      */
-    FrameWindow(Frame &frame): name(frame.name), img(frame.img), changed(true){}
+    FrameWindow(Frame &frame) : name(frame.name), img(frame.img), changed(true) {}
 
     /**
      * Replaces img and marks it as changed
      *
-     * The method can be launched from different thread, so the reloadTexture function is not used. You have to run it manually from the main thread.
+     * The method can be launched from different thread, so the reloadTexture function is not used. You have to run it
+     * manually from the main thread.
      *
      * @param new_image New image
      */
@@ -47,7 +47,8 @@ public:
 
     /**
      * Reloads the texture from the img. Creates a texture handler if it's not present.
-     * If the image has 1 channel it's assumed to be grayscale (and it's converted to BGR), otherwise it's treated like BGR.
+     * If the image has 1 channel it's assumed to be grayscale (and it's converted to BGR), otherwise it's treated like
+     * BGR.
      *
      * Has to be run from the same thread as `glfwInit` (the main one)
      */
@@ -63,9 +64,9 @@ public:
     ~FrameWindow();
 
 private:
-    GLuint texture = -1; ///< OpenGL texture identifier
-    std::string name; ///< Window name
-    cv::Mat img; ///< Image to display
+    GLuint texture = -1;  ///< OpenGL texture identifier
+    std::string name;     ///< Window name
+    cv::Mat img;          ///< Image to display
     bool changed = false; ///< If the img has changed since last texture reload
 };
 
@@ -107,9 +108,9 @@ void FrameWindow::display()
         reloadTexture();
     }
 
-    ImGui::Begin(name.c_str(), NULL,  ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+    ImGui::Begin(name.c_str(), NULL, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 
-    //TODO: resize window
+    // TODO: resize window
     // int y = ImGui::GetWindowSize().x * frame.img.rows/ frame.img.cols;
 
     // ImGui::Image((void *)(intptr_t)frame.texture, ImVec2(ImGui::GetWindowSize().x, y));
@@ -118,11 +119,7 @@ void FrameWindow::display()
     ImGui::End();
 }
 
-FrameWindow::~FrameWindow()
-{
-    glDeleteTextures(1, &texture);
-}
-
+FrameWindow::~FrameWindow() { glDeleteTextures(1, &texture); }
 
 //------------------ COMMAND LINE OPTIONS ----------------------
 /**
@@ -135,10 +132,12 @@ typedef struct Config
 } Config;
 
 /**
- * Parse command line options
+ * Parses command line options
  *
  * @param argc Arguments counter
  * @param argv Arguments values
+ *
+ * @returns Stucture with parsed configuration
  */
 Config parseOptions(int argc, char const *argv[])
 {
@@ -186,7 +185,7 @@ static void glfwErrorCallback(int error, const char *description)
 }
 
 /**
- * Initialize GLFW
+ * Initializes GLFW
  */
 void initGui()
 {
@@ -202,7 +201,7 @@ void initGui()
 }
 
 /**
- * Create window with the size of the screen
+ * Creates window with the size of the screen
  *
  * @param name Window name
  *
@@ -224,7 +223,7 @@ GLFWwindow *createWindow(std::string name)
 }
 
 /**
- * Set context amd backend for Dear ImGui
+ * Sets context and backend for Dear ImGui
  */
 void setupDearImGui(GLFWwindow *window)
 {
@@ -238,9 +237,8 @@ void setupDearImGui(GLFWwindow *window)
     ImGui_ImplOpenGL3_Init(GLSL_VERSION);
 }
 
-
 /**
- * Render prepared frames
+ * Renders prepared frames
  *
  * @param window Window in which frames will be rendered
  */
@@ -262,7 +260,7 @@ void render(GLFWwindow *window)
 }
 
 /**
- * Close Dear ImGui and GLFW
+ * Closes Dear ImGui and GLFW
  *
  * @param window Window to clean and close
  */
@@ -278,10 +276,12 @@ void cleanUp(GLFWwindow *window)
 
 std::unordered_map<std::string, FrameWindow> frames; ///< Most recent frames from all streams
 std::mutex frames_mutex; ///< Mutex for `frames` map. The map is used by main and receiver thread
-int socket_id; ///< Socket on which messages from servers are received
+int socket_id;           ///< Socket on which messages from servers are received
 
 /**
- * Receive frames and put them in the map
+ * Receives frames and put them in the map
+ *
+ * The function is ment to run in the separate thread.
  *
  * @param config Configuration from command line arguments
  */
@@ -300,7 +300,7 @@ void receiveFrames(Config config)
         {
             frames.at(frame.name).changeImg(frame.img);
         }
-        catch(std::out_of_range e)
+        catch (std::out_of_range e)
         {
             frames.insert({frame.name, FrameWindow(frame)});
         }
@@ -309,7 +309,6 @@ void receiveFrames(Config config)
         frame = receiver.receiveFrame();
     }
 }
-
 
 int main(int argc, const char **argv)
 {

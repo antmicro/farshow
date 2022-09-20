@@ -8,10 +8,6 @@ find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(Threads)
 
-# set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
-# set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-# set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-
 set(INCLUDE_DIRECTORIES
     ${OpenCV_INCLUDE_DIRS}
     include
@@ -35,6 +31,7 @@ add_library(${PROJECT_NAME} SHARED
     src/udpinterface.cpp
     src/framesender.cpp
     src/framereceiver.cpp
+    src/utils.cpp
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
