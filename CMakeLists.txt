@@ -31,7 +31,6 @@ add_library(${PROJECT_NAME} SHARED
     src/udpinterface.cpp
     src/framesender.cpp
     src/framereceiver.cpp
-    src/utils.cpp
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES

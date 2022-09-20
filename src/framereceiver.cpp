@@ -1,21 +1,8 @@
 #include "framestreamer/framereceiver.hpp"
 #include "framestreamer/streamexception.hpp"
-#include "framestreamer/utils.hpp"
-
 #include <GLFW/glfw3.h>
 #include <opencv2/imgcodecs.hpp>
 #include <unistd.h>
-
-void printList(std::list<FrameContainer> &stream)
-{
-    std::cout << stream.begin()->name << ": ";
-
-    for (auto const &i : stream)
-    {
-        std::cout << i.id << " ";
-    }
-    std::cout << std::endl;
-}
 
 FrameReceiver::FrameReceiver(std::string client_address, int client_port) : UdpInterface(client_address, client_port)
 {
@@ -39,7 +26,7 @@ FrameMessage FrameReceiver::receiveFramePart()
     }
     else if (res == 0)
     {
-        // Parent thread's shut the socket down
+        // Parent thread has shut the socket down
         running = false;
         close(mySocket);
     }
@@ -124,13 +111,11 @@ Frame FrameReceiver::receiveFrame()
 
             if ((*frame).isComplete())
             {
-                glfwPostEmptyEvent(); // to unblock parent thread
                 return Frame{frame->name, prepareToShow(frame)};
             }
         }
         else
         {
-            glfwPostEmptyEvent();
             return Frame{};
         }
     }

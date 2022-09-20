@@ -13,7 +13,7 @@ struct FrameHeader
     unsigned name_length; ///< length of stream name
     unsigned frame_id;    ///< id of the frame in this stream
     unsigned part_id;     ///< part id
-    unsigned total_parts; ///< How many parts of the frame were send
+    unsigned total_parts; ///< how many parts of the frame were send
 };
 
 /**
@@ -46,6 +46,6 @@ public:
     ~UdpInterface();
 
 protected:
-    struct sockaddr_in clientAddr; ///< Client's ip address structure
-    int mySocket;                  ///< Socket binded to client address
+    struct sockaddr_in clientAddr; ///< client's ip address structure
+    int mySocket;                  ///< socket binded to client address
 };

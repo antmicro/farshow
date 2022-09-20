@@ -38,7 +38,7 @@ public:
     }
 
     /**
-     * Provide vector with encoding parameters, ready to pass to cv::imencode
+     * Provides vector with encoding parameters, ready to pass to cv::imencode
      *
      * @returns vector with encoding parameters, ready to pass to cv::imencode
      */
@@ -63,7 +63,7 @@ typedef struct Config
 } Config;
 
 /**
- * Check if all required arguments were provided
+ * Checks if all required arguments were provided
  *
  * @param result Parsed arguments
  * @param required Required arguments
@@ -80,10 +80,12 @@ void checkRequiredArgs(cxxopts::ParseResult &result, std::vector<std::string> &r
 }
 
 /**
- * Parse command line options
+ * Parses command line options
  *
  * @param argc Arguments counter
  * @param argv Arguments values
+ *
+ * @returns Parsed configuration
  */
 Config parseOptions(int argc, char const *argv[])
 {
@@ -99,6 +101,7 @@ Config parseOptions(int argc, char const *argv[])
                              "A demo for frame-streamer – a minimalistic library to stream frames from e.g. embeeded "
                              "devices.\nServer is capturing and streaming the frames.");
 
+    // clang-format off
     options.add_options()
         ("i, ip", "IP address of the client, which should receive stream", cxxopts::value(config.client_ip))
         ("p, port", "Port of the client, which will receive stream",
@@ -110,6 +113,7 @@ Config parseOptions(int argc, char const *argv[])
         ("s, source", "Filename of a camera device, which will be a stream source",
                 cxxopts::value(config.source)->default_value("/dev/video0"))
         ("h, help", "Print usage");
+    // clang-format on
 
     options.positional_help("<stream name> <client ip address>");
 

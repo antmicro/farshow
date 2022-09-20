@@ -1,7 +1,6 @@
 #pragma once
 #include "framestreamer/udpinterface.hpp"
 
-#include "imgui/imgui.h"
 #include "opencv2/core/mat.hpp"
 #include <list>
 #include <unordered_map>
@@ -71,7 +70,7 @@ public:
     Frame receiveFrame();
 
     /**
-     *Returns the socket used for communication
+     * Returns the socket used for communication
      *
      * @returns Socket used for communication
      */
@@ -104,7 +103,7 @@ private:
     std::list<FrameContainer>::iterator addPart(FrameMessage frame_part);
 
     std::unordered_map<std::string, std::list<FrameContainer>> streams; ///< All available streams mapped to their
-                                                                        ///< uncomplete frames. The frames are sorted by
+                                                                        ///< incomplete frames. The frames are sorted by
                                                                         ///< id.
     bool running = true; ///< If the socket is still open and the process should run
 };

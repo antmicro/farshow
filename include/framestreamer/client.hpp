@@ -11,7 +11,6 @@ typedef struct Config
     int port = 1100;     ///< my port
 } Config;
 
-
 /**
  * Class for handling displaying frames and loading their textures
  */
@@ -64,4 +63,3 @@ private:
     cv::Mat img;          ///< Image to display
     bool changed = false; ///< If the img has changed since last texture reload
 };
-

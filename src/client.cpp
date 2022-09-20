@@ -3,12 +3,10 @@
 #include "framestreamer/client.hpp"
 
 #include "cxxopts/cxxopts.hpp"
-#include "framestreamer/utils.hpp"
 #include "imgui/backends/imgui_impl_glfw.h"
 #include "imgui/backends/imgui_impl_opengl3.h"
 #include <GLFW/glfw3.h>
 #include <opencv2/imgproc.hpp>
-#include <signal.h>
 #include <thread>
 
 #define GLSL_VERSION "#version 130"
@@ -16,7 +14,6 @@
 /**
  * Client receives and shows streams
  */
-
 
 void FrameWindow::reloadTexture()
 {
@@ -58,12 +55,14 @@ void FrameWindow::display()
 
     ImGui::Begin(name.c_str(), NULL, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 
-    // TODO: resize window
-    // int y = ImGui::GetWindowSize().x * frame.img.rows/ frame.img.cols;
+    // resize window
+    ImVec2 view = ImGui::GetWindowSize();
+    int y = view.x * img.rows / img.cols; ///< scaled image height
+    int title_bar_size = 35; // imGui doesn't provide setWindowContentSize method, so the content area is smaller than
+                             // the image and the bottom of the image is cut. To avoid this, we create a bigger window
 
-    // ImGui::Image((void *)(intptr_t)frame.texture, ImVec2(ImGui::GetWindowSize().x, y));
-    // ImGui::SetWindowSize(frame.name.c_str(), ImVec2(ImGui::GetWindowSize().x, y));
-    ImGui::Image((void *)(intptr_t)texture, ImVec2(img.cols, img.rows));
+    ImGui::Image((void *)(intptr_t)texture, ImVec2(view.x, y));
+    ImGui::SetWindowSize(name.c_str(), ImVec2(view.x, y + title_bar_size));
     ImGui::End();
 }
 
@@ -87,11 +86,12 @@ Config parseOptions(int argc, char const *argv[])
     cxxopts::Options options("Frame-streamer client",
                              "A demo for frame-streamer – a minimalistic library to stream frames from e.g. embeeded "
                              "devices.\nClient is receiving and showing frames from a stream.");
-
+    // clang-format off
     options.add_options()
         ("i, ip", "IP address to which the stream was sent", cxxopts::value(config.ip))
         ("p, port", "Port to which stream was sent", cxxopts::value(config.port)->default_value("1100"))
         ("h, help", "Print usage");
+    // clang-format on
 
     // Get command line parameters and parse them
     try
@@ -163,6 +163,8 @@ GLFWwindow *createWindow(std::string name)
 
 /**
  * Sets context and backend for Dear ImGui
+ *
+ * @param window Window on which imgui should operate
  */
 void setupDearImGui(GLFWwindow *window)
 {
@@ -244,6 +246,7 @@ void receiveFrames(Config config)
             frames.insert({frame.name, FrameWindow(frame)});
         }
         frames_mutex.unlock();
+        glfwPostEmptyEvent(); // to unblock parent thread
 
         frame = receiver.receiveFrame();
     }
