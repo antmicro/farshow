@@ -27,7 +27,7 @@ public:
      *
      * @param frame Frame structure – source of the name and image
      */
-    FrameWindow(Frame &frame) : name(frame.name), img(frame.img), changed(true) {}
+    FrameWindow(Frame &frame) : name(frame.name), changed(true), texture(-1) {changeImg(frame.img);}
 
     /**
      * Replaces img and marks it as changed
@@ -35,14 +35,16 @@ public:
      * The method can be launched from different thread, so the reloadTexture function is not used. You have to run it
      * manually from the main thread.
      *
+     * If the image has 1 channel it's assumed to be grayscale (and it's converted to BGR), otherwise it's treated like
+     * BGR.
+     *
      * @param new_image New image
      */
     void changeImg(cv::Mat &new_image);
 
     /**
      * Reloads the texture from the img. Creates a texture handler if it's not present.
-     * If the image has 1 channel it's assumed to be grayscale (and it's converted to BGR), otherwise it's treated like
-     * BGR.
+     * Image should be in BGR format.
      *
      * Has to be run from the same thread as `glfwInit` (the main one)
      */
