@@ -44,16 +44,15 @@ std::list<FrameContainer>::iterator FrameReceiver::addPart(FrameMessage msg)
     unsigned part_size = DATAGRAM_SIZE - sizeof(msg.header) - 3 - msg.header.name_length;
 
     // Get stream name
-    std::unique_ptr<char> name = std::make_unique<char>(msg.header.name_length);
-    strcpy(name.get(), msg.data);
+    std::string name = std::string(msg.data, msg.header.name_length);
     std::cout << " (" << name << ")" << std::endl;
 
     // Find a frame
-    auto itr = streams[name.get()].begin();
+    auto itr = streams[name].begin();
 
-    if (!streams[name.get()].empty())
+    if (!streams[name].empty())
     {
-        while (itr != streams[name.get()].end() && itr->id < msg.header.frame_id)
+        while (itr != streams[name].end() && itr->id < msg.header.frame_id)
         {
             itr++;
         }
@@ -64,22 +63,22 @@ std::list<FrameContainer>::iterator FrameReceiver::addPart(FrameMessage msg)
         // If there is, we add the frame in the end (after the frames with very large id's). Because we use UDP, frames'
         // parts can be late. I've set the size of the "gap" to UINT_MAX/4, to minimize the probability of misplacing
         // the frame, but this value can be changed later if we'll find a better one.
-        if (itr != streams[name.get()].end() && itr->id - msg.header.frame_id > UINT_MAX / 4)
+        if (itr != streams[name].end() && itr->id - msg.header.frame_id > UINT_MAX / 4)
         {
             // Look for the proper place from the end
-            itr = streams[name.get()].end();
+            itr = streams[name].end();
             while (std::prev(itr)->id < UINT_MAX * 3 / 4 && std::prev(itr)->id >= msg.header.frame_id)
             {
                 itr--;
             }
         }
     }
-    if (itr == streams[name.get()].end() || itr->id > msg.header.frame_id)
+    if (itr == streams[name].end() || itr->id > msg.header.frame_id)
     {
         // Create a new frame
         unsigned frame_size = msg.header.total_parts * part_size;
-        FrameContainer frame = FrameContainer(msg.header.frame_id, msg.header.total_parts, name.get(), frame_size);
-        itr = streams[name.get()].insert(itr, frame);
+        FrameContainer frame = FrameContainer(msg.header.frame_id, msg.header.total_parts, name, frame_size);
+        itr = streams[name].insert(itr, frame);
     }
     // Copy image data to the frame pointed by iterator
     memcpy(itr->img.data() + msg.header.part_id * part_size, msg.data + msg.header.name_length, part_size);
