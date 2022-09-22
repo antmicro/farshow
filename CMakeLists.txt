@@ -40,34 +40,27 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${INCLUDE_DIRECTORIES})
 
-add_executable(server
+add_executable(${PROJECT_NAME}-server-example
     src/server.cpp
 )
 
-target_include_directories(server PUBLIC ${INCLUDE_DIRECTORIES})
-target_link_libraries(server PRIVATE
+target_include_directories(${PROJECT_NAME}-server-example PUBLIC ${INCLUDE_DIRECTORIES})
+target_link_libraries(${PROJECT_NAME}-server-example PRIVATE
     ${PROJECT_NAME}
     camera-capture
-)
-
-target_link_libraries(server PUBLIC
     ${OpenCV_LIBS}
     ${OPENGL_LIBRARY}
     GLEW
     glfw
 )
 
-add_executable(client
+add_executable(${PROJECT_NAME}-client
     src/client.cpp
 )
 
-target_include_directories(client PUBLIC ${INCLUDE_DIRECTORIES})
-target_link_libraries(client PRIVATE
+target_include_directories(${PROJECT_NAME}-client PUBLIC ${INCLUDE_DIRECTORIES})
+target_link_libraries(${PROJECT_NAME}-client PRIVATE
     ${PROJECT_NAME}
-    DearImGui
-)
-
-target_link_libraries(client PUBLIC
     ${OpenCV_LIBS}
     ${OPENGL_LIBRARY}
     GLEW
@@ -75,6 +68,8 @@ target_link_libraries(client PUBLIC
     ${CMAKE_THREAD_LIBS_INIT}
 )
 
-add_compile_options(-Wall -Wextra -pedantic  -o -g)
+target_compile_options({$PROJECT_NAME}-client PUBLIC -fconcepts)
+
+add_compile_options(-Wall -Wextra -pedantic  -o)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
