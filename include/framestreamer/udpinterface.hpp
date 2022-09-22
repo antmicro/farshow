@@ -46,6 +46,6 @@ public:
     ~UdpInterface();
 
 protected:
-    struct sockaddr_in clientAddr; ///< client's ip address structure
-    int mySocket;                  ///< socket binded to client address
+    struct sockaddr_in clientAddr = {0}; ///< client's ip address structure
+    int mySocket;                        ///< socket binded to client address
 };

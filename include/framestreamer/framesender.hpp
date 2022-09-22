@@ -30,7 +30,7 @@ public:
      * @param extension Extension determining output format (`.jpg`, `.png` ...)
      * @param encoding_params Format-specific parameters for cv::imencode
      */
-    void sendFrame(cv::Mat frame, std::string name, std::string extension = ".jpg",
+    void sendFrame(cv::Mat &frame, std::string name, std::string extension = ".jpg",
                    std::vector<int> encoding_params = {cv::IMWRITE_JPEG_QUALITY, 95});
 
     unsigned frame_parts_delay = 500; ///< Amount of sleep time in microseconds between sending frame parts

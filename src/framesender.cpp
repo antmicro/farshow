@@ -4,10 +4,10 @@
 #include <algorithm>
 #include <unistd.h>
 
-void FrameSender::sendFrame(cv::Mat frame, std::string name, std::string extension, std::vector<int> encoding_params)
+void FrameSender::sendFrame(cv::Mat &frame, std::string name, std::string extension, std::vector<int> encoding_params)
 {
     // Create a message
-    FrameMessage msg;
+    FrameMessage msg = {0};
 
     strcpy(msg.data, name.c_str());
     msg.header.name_length = name.length() + 1;
