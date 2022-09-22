@@ -1,20 +1,27 @@
-# Frame streamer
+# frame-streamer
 
 Copyright (c) 2022 [Antmicro](https://www.antmicro.com)
 
-A minimalistic library to stream frames from e.g. embedded devices.
+A minimalistic library for streaming and displaying frames from remote devices.
 
-When working on image processing flows, especially on embedded devices, it is crucial to analyze the intermediate results. However, on embedded devices, it may be uncomfortable.
+Work with image processing flows (e.g. from camera streams) usually involves analysing images from intermediate steps.
+However, when working with i.e. embedded devices, or remote devices, where displaying live images on the monitor is not always possible, the whole debugging process of image processing flows may become tedious. 
 
-The library allows sending frames to a remote application, working on the host, to quickly analyse and debug such processing flows. Of course, it's only one of the possible usages.
+`frame-streamer` provides:
+
+* `frame-streamer` - a library for streaming frames via UDP
+* `frame-streamer-client` - a program for receiving and displaying such frames on PC, allowing the user to have a live preview from remote device using OpenGL and [ImGui](https://github.com/ocornut/imgui)
 
 ![Client GUI](resources/client.png)
 
-----
-
 ## Building the project
 
-The project requires [OpenCV](https://opencv.org/releases/), [OpenGL](https://www.khronos.org/opengl/wiki/Getting_Started#Downloading_OpenGL), [glfw3](https://www.glfw.org/download) and a C++ compiler with C++20 support (g++-12 is recommended). 
+The project requires:
+
+* [OpenCV](https://opencv.org/releases/)
+* [OpenGL](https://www.khronos.org/opengl/wiki/Getting_Started#Downloading_OpenGL)
+* [glfw3](https://www.glfw.org/download)
+* C++ compiler with C++20 support (g++-12 is recommended). 
 
 To build the project, go to its root directory and execute:
 ```
@@ -22,9 +29,11 @@ cmake -s . -B build
 ```
 
 ## Running the demo
+
 The project consists of a streaming library and receiving application. They communicate with each other using UDP protocol.
 
 ### Server
+
 After the successful build, you can run the demo inside the `build` directory. E.g.:
 ```
 ./server 127.0.0.1
@@ -39,10 +48,11 @@ You can find more information about available arguments in command-line help:
 ./server --help
 ```
 
-### Client
+### `frame-streamer` client
+
 To receive and display the frames, you have to run the client:
 ```
-./client
+./frame-streamer-client
 ```
 
 After a successful run, the window with named streams should appear.
@@ -53,20 +63,24 @@ By default, the client will use port 1100, and receive messages from all availab
 
 You can also find more information about available arguments in command-line help:
 ```
-./client --help
+./frame-streamer-client --help
 ```
 
 ## Usage
+
 The core of the library are the `FrameSender` and `FrameReceiver` classes. They both derive from `UdpInterface`.
 
 ### Send frames
+
 You can use `FrameSender` in your program for the embedded device (server). 
 
 First, you should create an instance of the frame sender class:
+
 ```c++
 #include <framestreamer/framesender.hpp>
 FrameSender streamer = FrameSender("196.168.1.15", 1111);
 ```
+
 Where `196.168.1.15` is the client address and `1111` – his IP port. The constructor is also responsible for creating the socket.
 
 To send a frame under the name "my_stream" use:
@@ -74,6 +88,7 @@ To send a frame under the name "my_stream" use:
 ```c++
 streamer.sendFrame(frame, "my_stream");
 ```
+
 Where frame is a [cv::Mat](https://docs.opencv.org/4.x/d3/d63/classcv_1_1Mat.html). To match the client side, the frame should be sent as grayscale or BGR. We've chosen BGR because it's common in OpenCV.
 
 This will send the frame as a jpg with quality 95. You can send it in other formats, providing the next arguments. E.g. to send it as a png with compression 4, use:
@@ -81,6 +96,7 @@ This will send the frame as a jpg with quality 95. You can send it in other form
 ```c++
 streamer.sendFrame(frame, "my_stream", ".png", cv::IMWRITE_PNG_COMPRESSION=4);
 ```
+
 [Here](https://docs.opencv.org/3.4/d4/da8/group__imgcodecs.html#ga288b8b3da0892bd651fce07b3bbd3a56) you can find more information about supported formats.
 
 To ensure continuity of the stream, use the same name for each frame in it.
@@ -94,10 +110,12 @@ To send the frame, we must encode it and check if it fits the datagram. If not, 
 The receiver is on the client side. Here we have to join the parts of the frame back together and keep the frames in order.
 
 To receive the frame, create an instance of the `FrameReceiver`:
+
 ```c++
 #include "framestreamer/framereceiver.hpp"
 FrameReceiver receiver = FrameReceiver();
 ```
+
 Without arguments, it binds the socket to all available interfaces, with default port 1100. You can of course provide the client IP address and port.
 
 Then fetch the frame:
@@ -107,6 +125,7 @@ Frame frame = receiver.receiveFrame();
 The function returns a `Frame` structure with two fields: `name` (the stream name) and `img` (cv::Mat with the image).
 
 You can then display the frame however you want. E.g.:
+
 ```c++
 #include <opencv2/highgui.hpp>
 
@@ -116,18 +135,16 @@ cv::waitKey(0);                // Wait for a keypress before closing the window
 ```
 
 #### Technical details
-`receiveFrame` is a loop, which receives parts of frames from various streams and joins them until any of the frames is complete (has all parts).
 
+`receiveFrame` is a loop, which receives parts of frames from various streams and joins them until any of the frames is complete (has all parts).
 To keep the frames in order, we've created a mapping from a stream name to a linked list of `FrameContainer`s with all of the stream frames. It's worth noticing, that the frames in the stream are mostly incomplete because when any of them is complete, we return it immediately. Frames in the list are sorted by id.
 
 When a new part of the frame comes, firstly we find the stream to which it belongs (by name). Then we look at the frame id and (like in insertion sort) look for a proper place for it. Then we copy the data from the frame part to the place where they should be in the actual frame. Since the ids can overflow, the algorithm assumes that when e.g. frame with id 0 comes after 4294967295, it should be placed at the end to ensure stream continuity.
 
 When the frame is complete, we delete all incomplete frames before it (because we have a newer one), decode it and return its name and image (in a `Frame` structure).
 
-[The client program](src/client.cpp) uses [Dear ImGui](https://github.com/ocornut/imgui) to display frames. The program has two threads. One is responsible for receiving frames and the main one – for displaying them. They communicate via a map with stream names and their most recent frames.
-
+[The `frame-streamer-client` program](src/client.cpp) uses [Dear ImGui](https://github.com/ocornut/imgui) to display frames. The program has two threads. One is responsible for receiving frames and the main one – for displaying them. They communicate via a map with stream names and their most recent frames.
 When the receiver thread receives a new frame, it puts it in the map, changing the most recent image.
-
 When the main thread notices that the frame is changed, it reloads the texture assigned to the frame and the displayed image changes. [Here](https://github.com/ocornut/imgui/wiki/Image-Loading-and-Displaying-Examples) you can read more about how Dear ImGui displays photos.
 
 ## Licensing
