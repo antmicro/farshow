@@ -32,20 +32,22 @@ cmake -s . -B build
 
 The project consists of a streaming library and receiving application. They communicate with each other using UDP protocol.
 
-### Server
+### `frame-streamer` server example
 
 After the successful build, you can run the demo inside the `build` directory. E.g.:
+
 ```
-./server 127.0.0.1
+./frame-streamer-server-example 127.0.0.1
 ```
 
-This will start the server, streaming frames to your localhost on the default port (1100). By default `/dev/video0` is taken as a stream source.
+This will start the demonstration server, streaming frames to your localhost on the default port (1100). By default `/dev/video0` is taken as a stream source.
 
 By default, the server sends frames in jpg format, with a quality factor of 95. To use e.g. png format with compression 4, add `-e .png -q 4` to the runtime parameters.
 
 You can find more information about available arguments in command-line help:
+
 ```
-./server --help
+./frame-streamer-server-example --help
 ```
 
 ### `frame-streamer` client
@@ -130,8 +132,8 @@ You can then display the frame however you want. E.g.:
 #include <opencv2/highgui.hpp>
 
 cv::namedWindow(frame.name, cv::WINDOW_AUTOSIZE); // Create a window
-cv::imshow(frame.name, frame.img); // Show image in it
-cv::waitKey(0);                // Wait for a keypress before closing the window
+cv::imshow(frame.name, frame.img);                // Show image in it
+cv::waitKey(0);                                   // Wait for a keypress before closing the window
 ```
 
 #### Technical details
