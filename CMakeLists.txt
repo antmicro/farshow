@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.10.0)
 set(CMAKE_CXX_STANDARD 20)
+set(DRAPIDJSON_BUILD_TESTS OFF)
 
 project(frame-streamer VERSION 0.1)
 
@@ -68,7 +69,7 @@ target_link_libraries(${PROJECT_NAME}-client PRIVATE
     ${CMAKE_THREAD_LIBS_INIT}
 )
 
-target_compile_options({$PROJECT_NAME}-client PUBLIC -fconcepts)
+target_compile_options(${PROJECT_NAME}-client PUBLIC -fconcepts)
 
 add_compile_options(-Wall -Wextra -pedantic  -o)
 
