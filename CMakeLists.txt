@@ -66,6 +66,7 @@ target_link_libraries(${PROJECT_NAME}-client PRIVATE
     ${OPENGL_LIBRARY}
     GLEW
     glfw
+    DearImGui
     ${CMAKE_THREAD_LIBS_INIT}
 )
 
