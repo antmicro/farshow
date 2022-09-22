@@ -52,8 +52,6 @@ public:
 
     /**
      * Prepares Dear ImGui window with the image
-     *
-     * @param frame Frame to display
      */
     void display();
 

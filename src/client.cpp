@@ -66,7 +66,13 @@ void FrameWindow::display()
     ImGui::End();
 }
 
-FrameWindow::~FrameWindow() { glDeleteTextures(1, &texture); }
+FrameWindow::~FrameWindow()
+{
+    if (texture != -1)
+    {
+        glDeleteTextures(1, &texture);
+    }
+}
 
 //------------------ COMMAND LINE OPTIONS ----------------------
 /**
