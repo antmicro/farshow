@@ -103,7 +103,7 @@ Config parseOptions(int argc, char const *argv[])
 
     // clang-format off
     options.add_options()
-        ("i, ip", "IP address of the client, which should receive stream", cxxopts::value(config.client_ip))
+        ("i, ip", "IP address of the client, which should receive stream. To send to multiple clients, enter broadcast address", cxxopts::value(config.client_ip))
         ("p, port", "Port of the client, which will receive stream",
                 cxxopts::value(config.client_port)->default_value("1100"))
         ("e, extension", "Extension of the format in which frames will be send (e.g. `.jpg`, `.png`)",
@@ -115,7 +115,7 @@ Config parseOptions(int argc, char const *argv[])
         ("h, help", "Print usage");
     // clang-format on
 
-    options.positional_help("<stream name> <client ip address>");
+    options.positional_help("<client ip address>");
 
     std::vector<std::string> required = {"ip"};
 
@@ -174,7 +174,6 @@ int main(int argc, const char **argv)
 
     FrameSender streamer = FrameSender(config.client_ip, config.client_port);
 
-    std::cout << config.extension.extension << " " << config.extension.quality << std::endl;
     while (running)
     {
         frame = camera.capture(CV_8UC2);

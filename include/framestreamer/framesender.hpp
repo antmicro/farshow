@@ -19,6 +19,9 @@ public:
     FrameSender(std::string client_address, int client_port = 1100, unsigned frame_parts_delay = 500)
         : UdpInterface(client_address, client_port)
     {
+        // Enable broadcasting
+        int broadcast = 1;
+        setsockopt(mySocket, SOL_SOCKET, SO_BROADCAST, &broadcast, sizeof(broadcast));
     }
 
     /**
