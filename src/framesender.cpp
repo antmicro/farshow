@@ -1,8 +1,11 @@
-#include "framestreamer/framesender.hpp"
-#include "framestreamer/streamexception.hpp"
+#include "farshow/framesender.hpp"
+#include "farshow/streamexception.hpp"
 
 #include <algorithm>
 #include <unistd.h>
+
+namespace farshow
+{
 
 void FrameSender::sendFrame(cv::Mat &frame, std::string name, std::string extension, std::vector<int> encoding_params)
 {
@@ -54,3 +57,5 @@ void FrameSender::sendFrame(cv::Mat &frame, std::string name, std::string extens
         usleep(frame_parts_delay);
     }
 }
+
+};

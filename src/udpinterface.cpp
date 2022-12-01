@@ -1,7 +1,10 @@
-#include "framestreamer/udpinterface.hpp"
-#include "framestreamer/streamexception.hpp"
+#include "farshow/udpinterface.hpp"
+#include "farshow/streamexception.hpp"
 
 #include <unistd.h>
+
+namespace farshow
+{
 
 UdpInterface::UdpInterface(std::string client_ip, int client_port)
 {
@@ -19,3 +22,5 @@ UdpInterface::UdpInterface(std::string client_ip, int client_port)
 }
 
 UdpInterface::~UdpInterface() { close(mySocket); }
+
+};

@@ -1,8 +1,11 @@
-#include "framestreamer/framereceiver.hpp"
-#include "framestreamer/streamexception.hpp"
+#include "farshow/framereceiver.hpp"
+#include "farshow/streamexception.hpp"
 #include <GLFW/glfw3.h>
 #include <opencv2/imgcodecs.hpp>
 #include <unistd.h>
+
+namespace farshow
+{
 
 FrameReceiver::FrameReceiver(std::string client_address, int client_port) : UdpInterface(client_address, client_port)
 {
@@ -119,3 +122,5 @@ Frame FrameReceiver::receiveFrame()
         }
     }
 }
+
+};

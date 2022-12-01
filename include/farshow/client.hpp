@@ -1,15 +1,10 @@
 #pragma once
-#include "framestreamer/framereceiver.hpp"
+#include "farshow/framereceiver.hpp"
 #include <GL/glew.h> //GLuint
+#include <GLFW/glfw3.h>
 
-/**
- * Configuration of current program execution
- */
-typedef struct Config
+namespace farshow
 {
-    std::string ip = ""; ///< my ip address
-    int port = 1100;     ///< my port
-} Config;
 
 /**
  * Class for handling displaying frames and loading their textures
@@ -62,4 +57,42 @@ private:
     std::string name;     ///< Window name
     cv::Mat img;          ///< Image to display
     bool changed = false; ///< If the img has changed since last texture reload
+};
+
+static void glfwErrorCallback(int error, const char *description);
+
+/**
+ * Initializes GLFW
+ */
+void initGui();
+
+/**
+ * Creates window with the size of the screen
+ *
+ * @param name Window name
+ *
+ * @returns window
+ */
+GLFWwindow *createWindow(std::string name);
+
+/**
+ * Sets context and backend for Dear ImGui
+ *
+ * @param window Window on which imgui should operate
+ */
+void setupDearImGui(GLFWwindow *window);
+
+/**
+ * Renders prepared frames
+ *
+ * @param window Window in which frames will be rendered
+ */
+void render(GLFWwindow *window);
+
+/**
+ * Closes Dear ImGui and GLFW
+ *
+ * @param window Window to clean and close
+ */
+void cleanUp(GLFWwindow *window);
 };

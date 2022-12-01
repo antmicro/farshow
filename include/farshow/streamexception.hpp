@@ -4,8 +4,11 @@
 #include <iostream>
 #include <memory>
 
+namespace farshow
+{
+
 /**
- * Exception to handle errors from framestreamer
+ * Exception to handle errors from farshow
  */
 class StreamException : public std::exception
 {
@@ -38,4 +41,6 @@ private:
 
     int error_code;  ///< linux error code (0 if not related)
     std::string msg; ///< description
+};
+
 };

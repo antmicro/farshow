@@ -1,9 +1,12 @@
 #pragma once
-#include "framestreamer/udpinterface.hpp"
+#include "farshow/udpinterface.hpp"
 
 #include "opencv2/core/mat.hpp"
 #include <list>
 #include <unordered_map>
+
+namespace farshow
+{
 
 /**
  * Complete frame, ready for return
@@ -106,4 +109,6 @@ private:
                                                                         ///< incomplete frames. The frames are sorted by
                                                                         ///< id.
     bool running = true; ///< If the socket is still open and the process should run
+};
+
 };

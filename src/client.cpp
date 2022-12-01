@@ -1,6 +1,6 @@
-#include "framestreamer/streamexception.hpp"
+#include "farshow/streamexception.hpp"
 
-#include "framestreamer/client.hpp"
+#include "farshow/client.hpp"
 
 #include "cxxopts/cxxopts.hpp"
 #include "imgui/backends/imgui_impl_glfw.h"
@@ -11,10 +11,12 @@
 
 #define GLSL_VERSION "#version 130"
 
+namespace farshow
+{
+
 /**
  * Client receives and shows streams
  */
-
 void FrameWindow::reloadTexture()
 {
     if (texture == -1)
@@ -74,54 +76,6 @@ FrameWindow::~FrameWindow()
     }
 }
 
-//------------------ COMMAND LINE OPTIONS ----------------------
-/**
- * Parses command line options
- *
- * @param argc Arguments counter
- * @param argv Arguments values
- *
- * @returns Stucture with parsed configuration
- */
-Config parseOptions(int argc, char const *argv[])
-{
-    Config config;
-    cxxopts::ParseResult result;
-
-    // Set available options
-    cxxopts::Options options("Frame-streamer client",
-                             "A demo for frame-streamer – a minimalistic library to stream frames from e.g. embeeded "
-                             "devices.\nClient is receiving and showing frames from a stream.");
-    // clang-format off
-    options.add_options()
-        ("i, ip", "IP address to which the stream was sent", cxxopts::value(config.ip))
-        ("p, port", "Port to which stream was sent", cxxopts::value(config.port)->default_value("1100"))
-        ("h, help", "Print usage");
-    // clang-format on
-
-    // Get command line parameters and parse them
-    try
-    {
-        result = options.parse(argc, argv);
-    }
-    catch (cxxopts::OptionException e)
-    {
-        std::cerr << std::endl
-                  << "\033[31mError while parsing command line arguments: " << e.what() << "\033[0m" << std::endl
-                  << std::endl;
-        std::cout << options.help() << std::endl;
-        exit(1);
-    }
-
-    if (result.count("help"))
-    {
-        std::cout << options.help() << std::endl;
-        exit(0);
-    }
-
-    return config;
-}
-
 //--------------------------- GUI ------------------------------
 
 static void glfwErrorCallback(int error, const char *description)
@@ -129,9 +83,6 @@ static void glfwErrorCallback(int error, const char *description)
     fprintf(stderr, "Glfw Error %d: %s\n", error, description);
 }
 
-/**
- * Initializes GLFW
- */
 void initGui()
 {
     // Setup window
@@ -145,13 +96,6 @@ void initGui()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 }
 
-/**
- * Creates window with the size of the screen
- *
- * @param name Window name
- *
- * @returns window
- */
 GLFWwindow *createWindow(std::string name)
 {
     // Create window with graphics context
@@ -167,11 +111,6 @@ GLFWwindow *createWindow(std::string name)
     return window;
 }
 
-/**
- * Sets context and backend for Dear ImGui
- *
- * @param window Window on which imgui should operate
- */
 void setupDearImGui(GLFWwindow *window)
 {
     // context
@@ -184,11 +123,6 @@ void setupDearImGui(GLFWwindow *window)
     ImGui_ImplOpenGL3_Init(GLSL_VERSION);
 }
 
-/**
- * Renders prepared frames
- *
- * @param window Window in which frames will be rendered
- */
 void render(GLFWwindow *window)
 {
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
@@ -206,11 +140,6 @@ void render(GLFWwindow *window)
     glfwSwapBuffers(window);
 }
 
-/**
- * Closes Dear ImGui and GLFW
- *
- * @param window Window to clean and close
- */
 void cleanUp(GLFWwindow *window)
 {
     ImGui_ImplOpenGL3_Shutdown();
@@ -221,75 +150,4 @@ void cleanUp(GLFWwindow *window)
     glfwTerminate();
 }
 
-std::unordered_map<std::string, FrameWindow> frames; ///< Most recent frames from all streams
-std::mutex frames_mutex; ///< Mutex for `frames` map. The map is used by main and receiver thread
-int socket_id;           ///< Socket on which messages from servers are received
-
-/**
- * Receives frames and put them in the map
- *
- * The function is ment to run in the separate thread.
- *
- * @param config Configuration from command line arguments
- */
-void receiveFrames(Config config)
-{
-    FrameReceiver receiver = FrameReceiver(config.ip, config.port);
-    socket_id = receiver.getSocket();
-    Frame frame;
-
-    frame = receiver.receiveFrame();
-    while (!frame.img.empty())
-    {
-        // Place the new frame in the map
-        frames_mutex.lock();
-        try
-        {
-            frames.at(frame.name).changeImg(frame.img);
-        }
-        catch (std::out_of_range e)
-        {
-            frames.insert({frame.name, FrameWindow(frame)});
-        }
-        frames_mutex.unlock();
-        glfwPostEmptyEvent(); // to unblock parent thread
-
-        frame = receiver.receiveFrame();
-    }
-}
-
-int main(int argc, const char **argv)
-{
-    static Config config = parseOptions(argc, argv); ///< parsed command line arguments
-
-    std::thread receiver_thread = std::thread(receiveFrames, config); ///< thread receiving messages from servers
-
-    initGui();
-    GLFWwindow *window = createWindow("Frame streamer"); ///< window for displaying the streams
-    setupDearImGui(window);
-
-    while (!glfwWindowShouldClose(window))
-    {
-        glfwPollEvents();
-
-        // Display all streams
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-
-        frames_mutex.lock();
-        for (auto &f : frames)
-        {
-            f.second.display();
-        }
-        frames_mutex.unlock();
-
-        render(window);
-    }
-
-    std::cout << "Closing client...\n";
-    shutdown(socket_id, 2); // To stop the child thread, blocked on recv
-    receiver_thread.join();
-    cleanUp(window);
-    return 0;
-}
+};

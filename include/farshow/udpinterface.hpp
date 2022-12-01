@@ -5,6 +5,9 @@
 
 #define DATAGRAM_SIZE 65507
 
+namespace farshow
+{
+
 /**
  * Frame metadata
  */
@@ -48,4 +51,6 @@ public:
 protected:
     struct sockaddr_in clientAddr = {0}; ///< client's ip address structure
     int mySocket;                        ///< socket binded to client address
+};
+
 };

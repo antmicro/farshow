@@ -2,7 +2,9 @@ cmake_minimum_required(VERSION 3.10.0)
 set(CMAKE_CXX_STANDARD 20)
 set(DRAPIDJSON_BUILD_TESTS OFF)
 
-project(frame-streamer VERSION 0.1)
+project(farshow VERSION 0.1)
+
+set(OpenGL_GL_PREFERENCE GLVND)
 
 find_package(OpenCV REQUIRED)
 find_package(OpenGL REQUIRED)
@@ -28,39 +30,35 @@ add_library(DearImGui SHARED
     third-party/imgui/backends/imgui_impl_opengl3.cpp
 )
 
-add_library(${PROJECT_NAME} SHARED
+add_library(${PROJECT_NAME}-connection SHARED
     src/udpinterface.cpp
     src/framesender.cpp
     src/framereceiver.cpp
 )
 
-set_target_properties(${PROJECT_NAME} PROPERTIES
+set_target_properties(${PROJECT_NAME}-connection PROPERTIES
     VERSION ${PROJECT_VERSION}
     SOVERSION ${PROJECT_VERSION}
 )
 
-target_include_directories(${PROJECT_NAME} PUBLIC ${INCLUDE_DIRECTORIES})
-
 add_executable(${PROJECT_NAME}-server-example
-    src/server.cpp
+    src/app-example.cpp
 )
 
-target_include_directories(${PROJECT_NAME}-server-example PUBLIC ${INCLUDE_DIRECTORIES})
 target_link_libraries(${PROJECT_NAME}-server-example PRIVATE
-    ${PROJECT_NAME}
+    ${PROJECT_NAME}-connection
     ${OpenCV_LIBS}
     ${OPENGL_LIBRARY}
     GLEW
     glfw
 )
 
-add_executable(${PROJECT_NAME}-client
+add_library(${PROJECT_NAME}-client
     src/client.cpp
 )
 
-target_include_directories(${PROJECT_NAME}-client PUBLIC ${INCLUDE_DIRECTORIES})
-target_link_libraries(${PROJECT_NAME}-client PRIVATE
-    ${PROJECT_NAME}
+target_link_libraries(${PROJECT_NAME}-client PUBLIC
+    ${PROJECT_NAME}-connection
     ${OpenCV_LIBS}
     ${OPENGL_LIBRARY}
     GLEW
@@ -70,6 +68,14 @@ target_link_libraries(${PROJECT_NAME}-client PRIVATE
 )
 
 target_compile_options(${PROJECT_NAME}-client PUBLIC -fconcepts)
+
+add_executable(${PROJECT_NAME}
+    src/farshow-client.cpp
+)
+
+target_link_libraries(${PROJECT_NAME}
+    ${PROJECT_NAME}-client
+)
 
 add_compile_options(-Wall -Wextra -pedantic  -o)
 

@@ -1,7 +1,10 @@
 #pragma once
 
-#include "framestreamer/udpinterface.hpp"
+#include "farshow/udpinterface.hpp"
 #include <opencv2/imgcodecs.hpp>
+
+namespace farshow
+{
 
 /**
  * Streams frames to the client
@@ -39,4 +42,6 @@ public:
     unsigned frame_parts_delay = 500; ///< Amount of sleep time in microseconds between sending frame parts
 private:
     unsigned curr_frame_id = 0; ///< Id for the next frame
+};
+
 };

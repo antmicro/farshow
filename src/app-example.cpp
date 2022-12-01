@@ -1,6 +1,6 @@
-#include "framestreamer/streamexception.hpp"
+#include "farshow/streamexception.hpp"
+#include "farshow/framesender.hpp"
 #include <csignal>
-#include <framestreamer/framesender.hpp>
 
 #include "cxxopts/cxxopts.hpp"
 #include <opencv2/imgproc.hpp>
@@ -74,7 +74,7 @@ void checkRequiredArgs(cxxopts::ParseResult &result, std::vector<std::string> &r
     {
         if (result.count(r) == 0)
         {
-            throw StreamException("Error while parsing command line arguments: Parameter '" + r + "' is required");
+            throw farshow::StreamException("Error while parsing command line arguments: Parameter '" + r + "' is required");
         }
     }
 }
@@ -135,7 +135,7 @@ Config parseOptions(int argc, char const *argv[])
         std::cout << options.help() << std::endl;
         exit(1);
     }
-    catch (StreamException e)
+    catch (farshow::StreamException e)
     {
         std::cerr << "\033[31m" << e.what() << "\033[0m" << std::endl << std::endl;
         std::cout << options.help() << std::endl;
@@ -172,7 +172,7 @@ int main(int argc, const char **argv)
     cv::Mat frame;
     cv::Mat gray_frame;
 
-    FrameSender streamer = FrameSender(config.client_ip, config.client_port);
+    farshow::FrameSender streamer(config.client_ip, config.client_port);
 
     while (running)
     {
