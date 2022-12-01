@@ -3,8 +3,8 @@
 #include <framestreamer/framesender.hpp>
 
 #include "cxxopts/cxxopts.hpp"
-#include <camera-capture/cameracapture.hpp>
 #include <opencv2/imgproc.hpp>
+#include <opencv2/videoio.hpp>
 
 /**
  * Server is e.g. and embeeded device. It streams the frames
@@ -168,7 +168,7 @@ int main(int argc, const char **argv)
     running = true;
     signal(SIGINT, signalHandler); ///< exit with ^C
     Config config = parseOptions(argc, argv);
-    CameraCapture camera = CameraCapture(config.source);
+    cv::VideoCapture cap(config.source);
     cv::Mat frame;
     cv::Mat gray_frame;
 
@@ -176,7 +176,11 @@ int main(int argc, const char **argv)
 
     while (running)
     {
-        frame = camera.capture(CV_8UC2);
+        cap >> frame;
+        if (frame.empty())
+        {
+            break;
+        }
         streamer.sendFrame(frame, "input", config.extension.extension, config.extension.getEncodingParams());
 
         cv::blur(frame, frame, cv::Size2i(7, 7));

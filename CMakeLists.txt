@@ -9,7 +9,7 @@ find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(Threads)
 
-set(INCLUDE_DIRECTORIES
+include_directories(
     ${OpenCV_INCLUDE_DIRS}
     include
     third-party/include/
@@ -48,7 +48,6 @@ add_executable(${PROJECT_NAME}-server-example
 target_include_directories(${PROJECT_NAME}-server-example PUBLIC ${INCLUDE_DIRECTORIES})
 target_link_libraries(${PROJECT_NAME}-server-example PRIVATE
     ${PROJECT_NAME}
-    camera-capture
     ${OpenCV_LIBS}
     ${OPENGL_LIBRARY}
     GLEW
