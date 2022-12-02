@@ -5,18 +5,18 @@ Copyright (c) 2022 [Antmicro](https://www.antmicro.com)
 A minimalistic library for streaming and displaying frames from remote devices.
 
 Work with image processing flows (e.g. from camera streams) usually involves analysing images from intermediate steps.
-However, when working with i.e. embedded devices, or remote devices, where displaying live images on the monitor is not always possible, the whole debugging process of image processing flows may become tedious.
+However, when working with e.g. embedded or remote devices, where displaying live images on the monitor is not always possible, the entire image processing flow debugging process may become tedious.
 
 `farshow` provides:
 
 * `farshow-conection` - a library for streaming frames via UDP
-* `farshow` - a program for receiving and displaying such frames on PC, allowing the user to have a live preview from remote device using OpenGL and [ImGui](https://github.com/ocornut/imgui)
+* `farshow` - a program for receiving and displaying such frames on PC, providing the user with a live preview from a remote device using OpenGL and [ImGui](https://github.com/ocornut/imgui)
 
 ![Client GUI](resources/client.png)
 
 ## Building the project
 
-The project requires:
+Project requirements:
 
 * [OpenCV](https://opencv.org/releases/)
 * [OpenGL](https://www.khronos.org/opengl/wiki/Getting_Started#Downloading_OpenGL)
@@ -30,17 +30,17 @@ cmake -s . -B build
 
 ## Running the demo
 
-The project consists of a streaming library and receiving application. They communicate with each other using UDP protocol.
+The project consists of a streaming library and a receiving application. They communicate with each other using a UDP protocol.
 
 ### `farshow` server example
 
-After the successful build, you can run the demo inside the `build` directory. E.g.:
+After a successful build, you can run the demo inside the `build` directory, e.g.:
 
 ```
 ./farshow-server-example 127.0.0.1
 ```
 
-This will start the demonstration server, streaming frames to server running on `127.0.0.1` on the default port (`1100`). By default `/dev/video0` is taken as a stream source.
+This will start the demonstration server, streaming frames to the server running on `127.0.0.1` on the default port (`1100`). By default, `/dev/video0` is taken as a stream source.
 
 By default, the server sends frames in jpg format, with a quality factor of 95. To use e.g. png format with compression 4, add `-e .png -q 4` to the runtime parameters.
 
@@ -50,14 +50,14 @@ You can find more information about available arguments in command-line help:
 ./farshow-server-example --help
 ```
 
-### `farshow` application
+### The `farshow` application
 
-To receive and display the frames, you have to run the client:
+To receive and display frames, you have to run the client:
 ```
 ./farshow
 ```
 
-After a successful run, the window with named streams should appear.
+After a successful run, a window with named streams should appear.
 
 ![Client GUI gif](resources/client.gif)
 
@@ -74,7 +74,7 @@ All below classes are available in the `farshow` namespace.
 
 The core of the library are the `FrameSender` and `FrameReceiver` classes. They both derive from `UdpInterface`.
 
-### Send frames
+### Sending frames
 
 You can use `FrameSender` in your program for the embedded device (server).
 
@@ -85,7 +85,7 @@ First, you should create an instance of the frame sender class:
 farshow::FrameSender streamer("196.168.1.15", 1111);
 ```
 
-Where `196.168.1.15` is the client address and `1111` – its IP port. The constructor is also responsible for creating the socket.
+Where `196.168.1.15` is the client address and `1111` its IP port. The constructor is also responsible for creating a socket.
 
 To send a frame under the name "my_stream" use:
 
@@ -93,23 +93,23 @@ To send a frame under the name "my_stream" use:
 streamer.sendFrame(frame, "my_stream");
 ```
 
-Where frame is a [cv::Mat](https://docs.opencv.org/4.x/d3/d63/classcv_1_1Mat.html). To match the client side, the frame should be sent as grayscale or BGR. We've chosen BGR because it's common in OpenCV.
+Where a frame is a [cv::Mat](https://docs.opencv.org/4.x/d3/d63/classcv_1_1Mat.html), to match the client side, the frame should be sent as grayscale or BGR. We chose BGR as a type common in OpenCV.
 
-This will send the frame as a jpg with quality 95. You can send it in other formats, providing the next arguments. E.g. to send it as a png with compression 4, use:
+This will send the frame as a jpg with quality 95. You can send it in other formats, providing the following arguments. E.g., to send it as a png with compression 4, use:
 
 ```c++
 streamer.sendFrame(frame, "my_stream", ".png", cv::IMWRITE_PNG_COMPRESSION=4);
 ```
 
-Look for  more information about supported formats in [OpenCV image reading and writing documentation](https://docs.opencv.org/3.4/d4/da8/group__imgcodecs.html#ga288b8b3da0892bd651fce07b3bbd3a56).
+Look for more information about supported formats in [OpenCV image reading and writing documentation](https://docs.opencv.org/3.4/d4/da8/group__imgcodecs.html#ga288b8b3da0892bd651fce07b3bbd3a56).
 
-To ensure continuity of the stream, use the same name for each frame in it.
+To ensure continuity of the stream, use the same name for each frame within it.
 
 #### Technical details
-To send the frame, we must encode it and check if it fits the datagram. If not, it's split into parts. Each frame has an id and number of parts. Each part also has a separate id. The whole structure of the message is available in [`udpinterface.hpp`](include/farshow/udpinterface.hpp) file as `FrameMessage`. Then the message is sent to the client, which we assigned when creating the instance of `FrameSender`.
+To send a frame, we must encode it and check if it fits the datagram. If it does not, it is split into parts. Each frame has an id and number of parts. Each part also has a separate id. The entire structure of the message is available in the [`udpinterface.hpp`](include/farshow/udpinterface.hpp) file as `FrameMessage`. Then the message is sent to the client, which we assigned when creating the instance of `FrameSender`.
 
 
-### Receive frames
+### Receiving frames
 
 The receiver is on the client side. Here we have to join the parts of the frame back together and keep the frames in order.
 
@@ -120,7 +120,7 @@ To receive the frame, create an instance of the `FrameReceiver`:
 farshow::FrameReceiver receiver();
 ```
 
-Without arguments, it binds the socket to all available interfaces, with default port 1100. You can of course provide the client IP address and port.
+Without arguments, it binds the socket to all available interfaces, with the default port 1100. You can, of course, provide the client IP address and port.
 
 Then fetch the frame:
 ```c++
@@ -140,10 +140,10 @@ cv::waitKey(0);                                   // Wait for a keypress before 
 
 #### Technical details
 
-`receiveFrame` is a loop, which receives parts of frames from various streams and joins them until any of the frames is complete (has all parts).
-To keep the frames in order, we've created a mapping from a stream name to a linked list of `FrameContainer`s with all of the stream frames. It's worth noticing, that the frames in the stream are mostly incomplete because when any of them is complete, we return it immediately. Frames in the list are sorted by id.
+`receiveFrame` is a loop which receives parts of frames from various streams and joins them until any of the frames is complete (contains all parts).
+To keep the frames in order, we've created a mapping from a stream name to a linked list of `FrameContainer`s with all stream frames. It's worth noting that the frames in the stream are mostly incomplete because when any of them is complete, we return it immediately. Frames in the list are sorted by id.
 
-When a new part of the frame comes, firstly we find the stream to which it belongs (by name). Then we look at the frame id and (like in insertion sort) look for a proper place for it. Then we copy the data from the frame part to the place where they should be in the actual frame. Since the ids can overflow, the algorithm assumes that when e.g. frame with id 0 comes after 4294967295, it should be placed at the end to ensure stream continuity.
+When a new part of a frame appears, firstly we find the stream to which it belongs (by name). Then we look at the frame id and (like in insertion sort) look for a proper place for it. Then we copy the data from the frame part to the place where they should be in the actual frame. Since the ids can overflow, the algorithm assumes that when e.g. frame with id 0 comes after 4294967295, it should be placed at the end to ensure stream continuity.
 
 When the frame is complete, we delete all incomplete frames before it (because we have a newer one), decode it and return its name and image (in a `Frame` structure).
 
