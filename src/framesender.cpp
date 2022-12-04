@@ -47,11 +47,6 @@ void FrameSender::sendFrame(cv::Mat &frame, std::string name, std::string extens
             close(mySocket);
             throw StreamException("Cannot send", errno);
         }
-        else
-        {
-            std::cout << "Sent part " << msg.header.part_id + 1 << "/" << msg.header.total_parts << " of frame "
-                      << msg.header.frame_id << " (" << name << ")" << std::endl;
-        }
         msg.header.part_id++;
         position += available_space;
         usleep(frame_parts_delay);

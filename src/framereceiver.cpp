@@ -33,11 +33,6 @@ FrameMessage FrameReceiver::receiveFramePart()
         running = false;
         close(mySocket);
     }
-    else
-    {
-        std::cout << "received part " << msg.header.part_id + 1 << "/" << msg.header.total_parts << " of frame "
-                  << msg.header.frame_id;
-    }
 
     return msg;
 }
@@ -48,7 +43,6 @@ std::list<FrameContainer>::iterator FrameReceiver::addPart(FrameMessage msg)
 
     // Get stream name
     std::string name = std::string(msg.data, msg.header.name_length);
-    std::cout << " (" << name << ")" << std::endl;
 
     // Find a frame
     auto itr = streams[name].begin();
