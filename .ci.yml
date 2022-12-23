@@ -1,0 +1,31 @@
+image: debian:bookworm
+
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
+before_script:
+  - apt-get update
+  - DEBIAN_FRONTEND=noninteractive apt-get install -y
+    cmake
+    make
+    g++
+    libopencv-dev
+    libopengl-dev
+    libglfw3-dev
+    libglew-dev
+
+stages:
+  - test
+
+example-build:
+  stage: test
+  script:
+    - mkdir build && cd build
+    - cmake ..
+    - make && make install
+    - cd ../tests/example-build
+    - cp ../../src/app-example.cpp ./
+    - cp ../../src/farshow-client.cpp ./
+    - mkdir build && cd build
+    - cmake ..
+    - make
