@@ -13,11 +13,15 @@ find_package(Threads)
 
 include_directories(
     ${OpenCV_INCLUDE_DIRS}
-    include
-    third-party/include/
-    third-party/
-    third-party/imgui
     ${OPENGL_INCLUDE_DIRS}
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/third-party/include/>
+    $<INSTALL_INTERFACE:include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/third-party/>
+    $<INSTALL_INTERFACE:include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/third-party/imgui>
+    $<INSTALL_INTERFACE:include>
 )
 
 add_library(DearImGui SHARED
@@ -78,5 +82,36 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 add_compile_options(-Wall -Wextra -pedantic  -o)
+
+configure_file(
+    ${PROJECT_SOURCE_DIR}/${PROJECT_NAME}Config.cmake.in
+    ${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake @ONLY
+)
+
+install(
+    TARGETS 
+    ${PROJECT_NAME}-connection
+    ${PROJECT_NAME}-server-example
+    ${PROJECT_NAME}-client
+    ${PROJECT_NAME}
+    DearImGui
+    EXPORT ${PROJECT_NAME}-targets
+    LIBRARY DESTINATION lib
+    RUNTIME DESTINATION bin
+)
+export(
+    TARGETS ${PROJECT_NAME}-connection ${PROJECT_NAME}-client DearImGui
+    FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}-targets.cmake
+)
+install(
+    EXPORT ${PROJECT_NAME}-targets DESTINATION lib/cmake/${PROJECT_NAME}
+)
+install(
+    DIRECTORY include/farshow/ DESTINATION include/farshow/
+)
+install(
+    FILES ${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+    DESTINATION lib/cmake/${PROJECT_NAME}
+)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)

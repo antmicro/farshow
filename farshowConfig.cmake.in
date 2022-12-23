@@ -1,0 +1,6 @@
+get_filename_component(_dir "${CMAKE_CURRENT_LIST_DIR}" PATH)
+get_filename_component(_prefix "${_dir}/../.." ABSOLUTE)
+set(farshow_INCLUDE_DIRS "${_prefix}/include")
+include("${_prefix}/lib/cmake/farshow/farshow-targets.cmake")
+
+message(STATUS "farshow found. Headers: ${farshow_INCLUDE_DIRS}")
