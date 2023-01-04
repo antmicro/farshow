@@ -13,12 +13,24 @@ before_script:
     libopengl-dev
     libglfw3-dev
     libglew-dev
+    clang-tidy
+    clang-format
+    git
 
 stages:
-  - test
+  - lint
+  - export-test
+
+format-test:
+  stage: lint
+  script:
+    - mkdir build && cd build
+    - cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
+    - make format
+    - test -z $(git diff) && exit 0 || exit 1
 
 example-build:
-  stage: test
+  stage: export-test
   script:
     - mkdir build && cd build
     - cmake ..
