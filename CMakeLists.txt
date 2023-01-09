@@ -24,7 +24,7 @@ include_directories(
     $<INSTALL_INTERFACE:include>
 )
 
-add_library(DearImGui SHARED
+add_library(${PROJECT_NAME}-imgui SHARED
     third-party/imgui/imgui.cpp
     third-party/imgui/imgui_draw.cpp
     third-party/imgui/imgui_widgets.cpp
@@ -67,7 +67,7 @@ target_link_libraries(${PROJECT_NAME}-client PUBLIC
     ${OPENGL_LIBRARY}
     GLEW
     glfw
-    DearImGui
+    ${PROJECT_NAME}-imgui
     ${CMAKE_THREAD_LIBS_INIT}
 )
 
@@ -94,13 +94,13 @@ install(
     ${PROJECT_NAME}-server-example
     ${PROJECT_NAME}-client
     ${PROJECT_NAME}
-    DearImGui
+    ${PROJECT_NAME}-imgui
     EXPORT ${PROJECT_NAME}-targets
     LIBRARY DESTINATION lib
     RUNTIME DESTINATION bin
 )
 export(
-    TARGETS ${PROJECT_NAME}-connection ${PROJECT_NAME}-client DearImGui
+    TARGETS ${PROJECT_NAME}-connection ${PROJECT_NAME}-client ${PROJECT_NAME}-imgui
     FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}-targets.cmake
 )
 install(
