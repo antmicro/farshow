@@ -1,5 +1,5 @@
-#include "farshow/streamexception.hpp"
 #include "farshow/framesender.hpp"
+#include "farshow/streamexception.hpp"
 #include <csignal>
 
 #include "cxxopts/cxxopts.hpp"
@@ -74,7 +74,8 @@ void checkRequiredArgs(cxxopts::ParseResult &result, std::vector<std::string> &r
     {
         if (result.count(r) == 0)
         {
-            throw farshow::StreamException("Error while parsing command line arguments: Parameter '" + r + "' is required");
+            throw farshow::StreamException("Error while parsing command line arguments: Parameter '" + r +
+                                           "' is required");
         }
     }
 }

@@ -111,4 +111,4 @@ private:
     bool running = true; ///< If the socket is still open and the process should run
 };
 
-};
+}; // namespace farshow

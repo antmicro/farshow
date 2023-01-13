@@ -22,7 +22,7 @@ public:
      *
      * @param frame Frame structure – source of the name and image
      */
-    FrameWindow(Frame &frame) : name(frame.name), changed(true), texture(-1) {changeImg(frame.img);}
+    FrameWindow(Frame &frame) : name(frame.name), changed(true), texture(-1) { changeImg(frame.img); }
 
     /**
      * Replaces img and marks it as changed
@@ -95,4 +95,4 @@ void render(GLFWwindow *window);
  * @param window Window to clean and close
  */
 void cleanUp(GLFWwindow *window);
-};
+}; // namespace farshow

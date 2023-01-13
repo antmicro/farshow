@@ -43,4 +43,4 @@ private:
     std::string msg; ///< description
 };
 
-};
+}; // namespace farshow

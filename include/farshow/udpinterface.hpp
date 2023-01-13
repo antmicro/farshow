@@ -53,4 +53,4 @@ protected:
     int mySocket;                        ///< socket binded to client address
 };
 
-};
+}; // namespace farshow

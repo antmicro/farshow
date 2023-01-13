@@ -11,7 +11,6 @@
 
 #define GLSL_VERSION "#version 130"
 
-
 /**
  * Configuration of current program execution
  */

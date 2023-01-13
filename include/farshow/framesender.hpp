@@ -44,4 +44,4 @@ private:
     unsigned curr_frame_id = 0; ///< Id for the next frame
 };
 
-};
+}; // namespace farshow
