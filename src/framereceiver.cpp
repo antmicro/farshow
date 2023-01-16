@@ -117,4 +117,4 @@ Frame FrameReceiver::receiveFrame()
     }
 }
 
-};
+}; // namespace farshow

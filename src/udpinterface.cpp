@@ -23,4 +23,4 @@ UdpInterface::UdpInterface(std::string client_ip, int client_port)
 
 UdpInterface::~UdpInterface() { close(mySocket); }
 
-};
+}; // namespace farshow

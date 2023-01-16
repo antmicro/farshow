@@ -150,4 +150,4 @@ void cleanUp(GLFWwindow *window)
     glfwTerminate();
 }
 
-};
+}; // namespace farshow

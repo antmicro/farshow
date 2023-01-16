@@ -71,8 +71,6 @@ target_link_libraries(${PROJECT_NAME}-client PUBLIC
     ${CMAKE_THREAD_LIBS_INIT}
 )
 
-target_compile_options(${PROJECT_NAME}-client PUBLIC -fconcepts)
-
 add_executable(${PROJECT_NAME}
     src/farshow-client.cpp
 )
@@ -89,7 +87,7 @@ configure_file(
 )
 
 install(
-    TARGETS 
+    TARGETS
     ${PROJECT_NAME}-connection
     ${PROJECT_NAME}-server-example
     ${PROJECT_NAME}-client
@@ -116,6 +114,6 @@ install(
 
 add_custom_target(format
     COMMAND bash -c "find ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/include -iname \"*.cpp\" -o -iname \"*.hpp\" |xargs clang-tidy -format-style=file -p ${CMAKE_BINARY_DIR} -fix"
-    COMMAND bash -c "find ${CMAKE_SOURCE_DIR} ${CMAKE_INCLUDE_DIR} -iname \"*.cpp\" -o -iname \"*.hpp\"| xargs clang-format --style=file -i"
+    COMMAND bash -c "find ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/include -iname \"*.cpp\" -o -iname \"*.hpp\" | xargs clang-format --style=file -i"
     VERBATIM
 )

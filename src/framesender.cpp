@@ -12,7 +12,7 @@ void FrameSender::sendFrame(cv::Mat &frame, std::string name, std::string extens
     // Create a message
     FrameMessage msg = {0};
 
-    strcpy(msg.data, name.c_str());
+    strncpy(msg.data, name.c_str(), sizeof(msg.data) / sizeof(msg.data[0]));
     msg.header.name_length = name.length() + 1;
     msg.header.frame_id = curr_frame_id++;
     msg.header.part_id = 0;
@@ -53,4 +53,4 @@ void FrameSender::sendFrame(cv::Mat &frame, std::string name, std::string extens
     }
 }
 
-};
+}; // namespace farshow
