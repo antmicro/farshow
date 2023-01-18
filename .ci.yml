@@ -5,17 +5,17 @@ variables:
 
 before_script:
   - apt-get update
-  - DEBIAN_FRONTEND=noninteractive apt-get install -y
-    cmake
-    make
-    g++
-    libopencv-dev
-    libopengl-dev
-    libglfw3-dev
-    libglew-dev
-    clang-tidy
-    clang-format
-    git
+  - DEBIAN_FRONTEND=noninteractive apt-get install -qqy
+        clang-format
+        clang-tidy
+        cmake
+        g++
+        git
+        libglew-dev
+        libglfw3-dev
+        libopencv-dev
+        libopengl-dev
+        make
 
 stages:
   - lint
