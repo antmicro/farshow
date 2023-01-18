@@ -57,14 +57,15 @@ void FrameWindow::display()
 
     ImGui::Begin(name.c_str(), NULL, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 
-    // resize window
-    ImVec2 view = ImGui::GetWindowSize();
-    int y = view.x * img.rows / img.cols; ///< scaled image height
     int title_bar_size = 35; // imGui doesn't provide setWindowContentSize method, so the content area is smaller than
                              // the image and the bottom of the image is cut. To avoid this, we create a bigger window
 
-    ImGui::Image((void *)(intptr_t)texture, ImVec2(view.x, y));
-    ImGui::SetWindowSize(name.c_str(), ImVec2(view.x, y + title_bar_size));
+    ImGui::SetWindowSize(name.c_str(), ImVec2(img.cols + 16, img.rows + title_bar_size), ImGuiCond_FirstUseEver);
+    ImVec2 view = ImGui::GetWindowSize();
+    ImGui::Image((void *)(intptr_t)texture, ImVec2(view.x - 16, view.y - title_bar_size));
+
+    ImVec2 pos = ImGui::GetWindowPos();
+    ImGui::SetNextWindowPos(ImVec2(pos.x + title_bar_size, pos.y + title_bar_size), ImGuiCond_FirstUseEver);
     ImGui::End();
 }
 
