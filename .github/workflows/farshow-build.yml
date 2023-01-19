@@ -1,0 +1,96 @@
+name: farshow build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    container:
+      image: debian:bookworm
+
+    steps:
+    - name: Install dependencies
+      run: |
+        apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -qqy \
+          clang-format \
+          clang-tidy \
+          cmake \
+          g++ \
+          git \
+          libglew-dev \
+          libglfw3-dev \
+          libopencv-dev \
+          libopengl-dev \
+          make
+
+    - name: Add repository to safe list
+      run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+    - name: Checkout sources
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - name: Build the project
+      run: |
+        mkdir build
+        cd build
+        cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
+        make
+
+    - name: Code linting
+      run: |
+        cd build
+        make format
+        test -z $(git diff) && exit 0 || exit 1
+
+  export-test:
+    runs-on: ubuntu-latest
+    container:
+      image: debian:bookworm
+
+    steps:
+    - name: Install dependencies
+      run: |
+        apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -qqy \
+          clang-format \
+          clang-tidy \
+          cmake \
+          g++ \
+          git \
+          libglew-dev \
+          libglfw3-dev \
+          libopencv-dev \
+          libopengl-dev \
+          make
+
+    - name: Checkout sources
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - name: Build the project
+      run: |
+        mkdir build
+        cd build
+        cmake ..
+        make
+
+    - name: Install the project
+      run: |
+        cd build
+        make install
+
+    - name: Build the 'example-build'
+      run: |
+        cd tests/example-build
+        cp ../../src/app-example.cpp ./
+        cp ../../src/farshow-client.cpp ./
+        mkdir build
+        cd build
+        cmake ..
+        make
