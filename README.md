@@ -1,6 +1,6 @@
 # farshow
 
-Copyright (c) 2022 [Antmicro](https://www.antmicro.com)
+Copyright (c) 2022-2023 [Antmicro](https://www.antmicro.com)
 
 A minimalistic library for streaming and displaying frames from remote devices.
 
