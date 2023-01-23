@@ -110,10 +110,9 @@ int main(int argc, const char **argv)
 {
     static Config config = parseOptions(argc, argv); ///< parsed command line arguments
 
-    std::thread receiver_thread = std::thread(receiveFrames, config); ///< thread receiving messages from servers
-
     farshow::initGui();
-    GLFWwindow *window = farshow::createWindow("farshow"); ///< window for displaying the streams
+    std::thread receiver_thread = std::thread(receiveFrames, config); ///< thread receiving messages from servers
+    GLFWwindow *window = farshow::createWindow("farshow");            ///< window for displaying the streams
     farshow::setupDearImGui(window);
 
     while (!glfwWindowShouldClose(window))

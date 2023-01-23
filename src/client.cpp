@@ -48,23 +48,51 @@ void FrameWindow::changeImg(cv::Mat &new_image)
     changed = true;
 }
 
+void FrameWindow::aspectRatio(ImGuiSizeCallbackData *data)
+{
+    struct WindowData userdata = *(struct WindowData *)data->UserData;
+    float aspect_ratio = userdata.aspect_ratio;
+    float diffx = data->CurrentSize.x - data->DesiredSize.x;
+    float diffy = data->CurrentSize.y - data->DesiredSize.y;
+    int diff = diffx + diffy;
+    if (abs(diff) > 3)
+    {
+        data->DesiredSize.x = data->CurrentSize.x - diff - userdata.offset.x;
+        data->DesiredSize.y = data->DesiredSize.x / aspect_ratio;
+        // include window padding and title bar in resized window
+        data->DesiredSize.x += userdata.offset.x;
+        data->DesiredSize.y += userdata.offset.y;
+    }
+    else
+    {
+        data->DesiredSize.x = data->CurrentSize.x;
+        data->DesiredSize.y = data->CurrentSize.y;
+    }
+}
 void FrameWindow::display()
 {
+    ImGuiStyle &style = ImGui::GetStyle();
+    // imGui doesn't provide setWindowContentSize method, so the content area is smaller than the image and the bottom
+    // of the image is cut. To avoid this, we create a bigger window
+    const int title_bar_size = style.FramePadding.y * 2 + ImGui::GetFontSize();
+    // To reduce flickering, we round the aspect ratio to 1 decimal place
+    float aspect_ratio = round((float)img.cols / (float)img.rows * 10) / 10;
+    ImVec2 offset = ImVec2(style.WindowPadding.x * 2, style.WindowPadding.y * 2 + title_bar_size);
+    struct WindowData window_options = {aspect_ratio, offset};
     if (changed)
     {
         reloadTexture();
+        ImGui::SetNextWindowSize(ImVec2(img.cols + offset.x, img.cols / aspect_ratio + offset.y),
+                                 ImGuiCond_FirstUseEver);
     }
+    ImGui::SetNextWindowSizeConstraints(ImVec2(0, 0), ImVec2(FLT_MAX, FLT_MAX), aspectRatio, (void *)&window_options);
 
     ImGui::Begin(name.c_str(), NULL, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
-
-    // resize window
     ImVec2 view = ImGui::GetWindowSize();
-    int y = view.x * img.rows / img.cols; ///< scaled image height
-    int title_bar_size = 35; // imGui doesn't provide setWindowContentSize method, so the content area is smaller than
-                             // the image and the bottom of the image is cut. To avoid this, we create a bigger window
+    ImGui::Image((void *)(intptr_t)texture, ImVec2(view.x - offset.x, view.y - offset.y));
 
-    ImGui::Image((void *)(intptr_t)texture, ImVec2(view.x, y));
-    ImGui::SetWindowSize(name.c_str(), ImVec2(view.x, y + title_bar_size));
+    ImVec2 pos = ImGui::GetWindowPos();
+    ImGui::SetNextWindowPos(ImVec2(pos.x + title_bar_size, pos.y + title_bar_size), ImGuiCond_FirstUseEver);
     ImGui::End();
 }
 

@@ -1,5 +1,6 @@
 #pragma once
 #include "farshow/framereceiver.hpp"
+#include "imgui/imgui.h"
 #include <GL/glew.h> //GLuint
 #include <GLFW/glfw3.h>
 
@@ -57,6 +58,18 @@ private:
     std::string name;     ///< Window name
     cv::Mat img;          ///< Image to display
     bool changed = false; ///< If the img has changed since last texture reload
+    struct WindowData     ///< Window options
+    {
+        float aspect_ratio;
+        ImVec2 offset;
+    };
+
+    /**
+     * Resizes the window with given aspect ratio.
+     *
+     * @param data ImGuiSizeCallbackData structure with aspect ratio set in UserData.
+     */
+    static void aspectRatio(ImGuiSizeCallbackData *data);
 };
 
 static void glfwErrorCallback(int error, const char *description);
