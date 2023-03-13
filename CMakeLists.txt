@@ -10,6 +10,7 @@ find_package(OpenCV REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(Threads)
+find_package(pybind11)
 
 include_directories(
     ${OpenCV_INCLUDE_DIRS}
@@ -117,3 +118,30 @@ add_custom_target(format
     COMMAND bash -c "find ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/include -iname \"*.cpp\" -o -iname \"*.hpp\" | xargs clang-format --style=file -i"
     VERBATIM
 )
+
+IF( pybind11_FOUND )
+	add_subdirectory(third-party/cvnp)
+	pybind11_add_module(farshowpy 
+       		py-bindings/main.cpp	
+		py-bindings/streamexception.cpp
+		py-bindings/udpinterface.cpp	
+		src/udpinterface.cpp
+		py-bindings/framesender.cpp
+		src/framesender.cpp
+		py-bindings/framereceiver.cpp
+		src/framereceiver.cpp
+	)
+	set_target_properties(farshowpy PROPERTIES OUTPUT_NAME farshow)
+	target_link_libraries(farshowpy PRIVATE 
+		${OpenCV_LIBS} 
+		${PROJECT_NAME}-imgui 
+		GLEW
+    		glfw
+		cvnp
+	 	${PROJECT_NAME}-client
+		-lGL
+	)
+	install(TARGETS farshowpy
+		LIBRARY DESTINATION lib
+	)
+ENDIF()
