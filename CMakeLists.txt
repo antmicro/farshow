@@ -141,6 +141,8 @@ IF( pybind11_FOUND )
 	 	${PROJECT_NAME}-client
 		-lGL
 	)
+	file(	COPY py-bindings/example.py
+		DESTINATION .)
 	install(TARGETS farshowpy
 		LIBRARY DESTINATION lib
 	)
