@@ -16,7 +16,7 @@ def main():
     group.add_argument('ipaddr', nargs='?')
     parser.add_argument('-p', '--port', default=1100, type=int,
                         help="Port of the client, which will receive stream")
-    parser.add_argument('-e', '--extension', default='.jpg',
+    parser.add_argument('-e', '--extension', default='.jpg', choices=['.jpg', '.png'],
                         help="Extension of the format in which frames will be send (e.g. `.jpg`, `.png`)")
     parser.add_argument('-q', '--quality', type=int,
                         help="Frames quality factor (for jpg in range 0 to 100, for png it's compression rate from 0 to 9)")
