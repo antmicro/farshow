@@ -121,7 +121,7 @@ add_custom_target(format
 
 IF( pybind11_FOUND )
 	add_subdirectory(third-party/cvnp)
-	pybind11_add_module(farshowpy 
+	pybind11_add_module(python-farshow 
        		py-bindings/main.cpp	
 		py-bindings/streamexception.cpp
 		py-bindings/udpinterface.cpp	
@@ -131,19 +131,14 @@ IF( pybind11_FOUND )
 		py-bindings/framereceiver.cpp
 		src/framereceiver.cpp
 	)
-	set_target_properties(farshowpy PROPERTIES OUTPUT_NAME farshow)
-	target_link_libraries(farshowpy PRIVATE 
+	set_target_properties(python-farshow PROPERTIES OUTPUT_NAME farshow)
+	target_link_libraries(python-farshow PRIVATE 
 		${OpenCV_LIBS} 
-		${PROJECT_NAME}-imgui 
-		GLEW
-    		glfw
 		cvnp
-	 	${PROJECT_NAME}-client
-		-lGL
 	)
 	file(	COPY py-bindings/example.py
 		DESTINATION .)
-	install(TARGETS farshowpy
+	install(TARGETS python-farshow
 		LIBRARY DESTINATION lib
 	)
 ENDIF()
