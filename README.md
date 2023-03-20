@@ -23,10 +23,17 @@ Project requirements:
 * [glfw3](https://www.glfw.org/download)
 * C++ compiler with C++20 support (g++-12 is recommended).
 
+Additional requirements for Python bindings:
+* [NumPy](https://numpy.org/install)
+* [pybind11](https://pybind11.readthedocs.io/en/stable/installing.html)
+* [cvnp](https://github.com/pthom/cvnp)
+
 To build the project, go to its root directory and execute:
 ```
 cmake -s . -B build
 ```
+
+To be able to use Python bindings outside of build directory PYTHONPATH environment variable must be adjusted accordingly.
 
 ## Running the demo
 
@@ -150,6 +157,60 @@ When the frame is complete, we delete all incomplete frames before it (because w
 [The `farshow` program](src/farshow-client.cpp) uses [Dear ImGui](https://github.com/ocornut/imgui) to display frames. The program has two threads. One is responsible for receiving frames and the main one – for displaying them. They communicate via a map with stream names and their most recent frames.
 When the receiver thread receives a new frame, it puts it in the map, changing the most recent image.
 When the main thread notices that the frame is changed, it reloads the texture assigned to the frame and the displayed image changes. Look at [Image Loading and Displaying examples with ImGui](https://github.com/ocornut/imgui/wiki/Image-Loading-and-Displaying-Examples) for more information on how Dear ImGui displays photos.
+
+## Usage in Python
+
+All below classes are available in the `farshow` module.
+
+The core of library i.e. `FrameSender` and `FrameReceiver` is accessible from Python. Python functions resemble C++ counterparts as close as possible. For clarity the usage details are below.
+
+### Sending frames
+
+You can use `FrameSender` in your program for the embedded device (server).
+
+First, you should create an instance of the frame sender class:
+```python
+import farshow
+streamer = farshow.FrameSender("196.168.1.15", 1111)
+```
+Where `196.168.1.15` is the client address adn `1111` is IP port. The constructor is also responsible for creating socket.
+
+To send a frame under the name "my_stream" use:
+```python
+streamer.sendFrame(frame, "my_stream")
+```
+Where a frame is a [numpy.ndarray](https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html), to match client side, the frame should be sent OpenCV compatible format, grayscale or BGR. We chose BGR as a type common in OpenCV.
+
+This will send the frame as a jpg with quality 95. You can send it in other formats, providing the following arguments. E.g., to send it as png with compression 4, use:
+```python
+streamer.sendFrame(frame, "my_stream", ".png", [cv2.IMWRITE_PNG_COMPRESSION, 4])
+```
+
+### Receiving frames
+
+The receiver is on client side. Here we have to join the parts of frame back together and keep the frames in order.
+
+To receive the frame, create an instance of `FrameReceiver`:
+```python
+import farshow
+receiver = farshow.FrameReceiver();
+```
+Without arguments, it binds the socket to all avaible interfaces, with the default port 1100. You can, of course, provide the client IP address and port.
+
+Then fetch the frame:
+```python
+frame = receiver.receiveFrame()
+```
+The function returns a `Frame` class with two fields: `name` (the stream name) and `img` (numpy.ndarray with the image).
+
+You can then display the frame however you want. E.g.:
+```python
+import cv2
+
+cv2.namedWindow(frame.name, cv2.WINDOW_AUTOSIZE) # Create a window
+cv2.imshow(frame.name, frame.img)		 # Show image in it
+cv2.waitKey(0)					 # Wait for a keypress before closing the window
+```
 
 ## Licensing
 
