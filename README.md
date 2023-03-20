@@ -208,8 +208,8 @@ You can then display the frame however you want. E.g.:
 import cv2
 
 cv2.namedWindow(frame.name, cv2.WINDOW_AUTOSIZE) # Create a window
-cv2.imshow(frame.name, frame.img)		 # Show image in it
-cv2.waitKey(0)					 # Wait for a keypress before closing the window
+cv2.imshow(frame.name, frame.img)                # Show image in it
+cv2.waitKey(0)                                   # Wait for a keypress before closing the window
 ```
 
 ## Licensing
