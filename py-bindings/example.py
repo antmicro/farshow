@@ -11,14 +11,14 @@ def main():
                                      description=("A demo for frame-streamer – a minimalistic library to stream frames from e.g. "
                                                   "embedded devices.\nServer is capturing and streaming the frames."))
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument('-i', '--ip', nargs=1,
+    group.add_argument('-i', '--ip',
                        help="IP address of the client, which should receive stream. To send to multiple clients, enter broadcast address")
     group.add_argument('ipaddr', nargs='?')
-    parser.add_argument('-p', '--port', nargs=1, default=1100, type=int,
+    parser.add_argument('-p', '--port', default=1100, type=int,
                         help="Port of the client, which will receive stream")
-    parser.add_argument('-e', '--extension', nargs=1, default='.jpg',
+    parser.add_argument('-e', '--extension', default='.jpg',
                         help="Extension of the format in which frames will be send (e.g. `.jpg`, `.png`)")
-    parser.add_argument('-q', '--quality', nargs=1, type=int,
+    parser.add_argument('-q', '--quality', type=int,
                         help="Frames quality factor (for jpg in range 0 to 100, for png it's compression rate from 0 to 9)")
     parser.add_argument('-s', '--source', default='/dev/video0',
                         help="Filename of a camera device, which will be a stream source")
