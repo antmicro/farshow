@@ -1,5 +1,5 @@
 #include <pybind11/pybind11.h>
-#include "../include/farshow/streamexception.hpp"
+#include "farshow/streamexception.hpp"
 
 namespace py = pybind11;
 

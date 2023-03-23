@@ -1,5 +1,5 @@
 #include <pybind11/pybind11.h>
-#include "../include/farshow/udpinterface.hpp"
+#include "farshow/udpinterface.hpp"
 
 namespace py = pybind11;
 void initUdpInterface(py::module &m){

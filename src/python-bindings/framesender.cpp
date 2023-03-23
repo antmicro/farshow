@@ -1,7 +1,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include "cvnp/cvnp.h"
-#include "../include/farshow/framesender.hpp"
+#include "farshow/framesender.hpp"
 
 namespace py = pybind11;
 
