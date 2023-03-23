@@ -122,13 +122,13 @@ add_custom_target(format
 IF( pybind11_FOUND )
     add_subdirectory(third-party/cvnp)
     pybind11_add_module(python-farshow 
-        py-bindings/main.cpp
-        py-bindings/streamexception.cpp
-        py-bindings/udpinterface.cpp
+        src/python-bindings/main.cpp
+        src/python-bindings/streamexception.cpp
+        src/python-bindings/udpinterface.cpp
         src/udpinterface.cpp
-        py-bindings/framesender.cpp
+        src/python-bindings/framesender.cpp
         src/framesender.cpp
-        py-bindings/framereceiver.cpp
+        src/python-bindings/framereceiver.cpp
         src/framereceiver.cpp
     )
     set_target_properties(python-farshow PROPERTIES OUTPUT_NAME farshow)
@@ -136,7 +136,7 @@ IF( pybind11_FOUND )
         ${OpenCV_LIBS} 
         cvnp
     )
-    file(COPY py-bindings/example.py
+    file(COPY src/python-bindings/example.py
          DESTINATION .)
     install(TARGETS python-farshow
             LIBRARY DESTINATION lib
