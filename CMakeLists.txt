@@ -113,11 +113,20 @@ install(
     DESTINATION lib/cmake/${PROJECT_NAME}
 )
 
-add_custom_target(format
-    COMMAND bash -c "find ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/include -iname \"*.cpp\" -o -iname \"*.hpp\" |xargs clang-tidy -format-style=file -p ${CMAKE_BINARY_DIR} -fix"
-    COMMAND bash -c "find ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/include -iname \"*.cpp\" -o -iname \"*.hpp\" | xargs clang-format --style=file -i"
-    VERBATIM
-)
+IF( pybind11_FOUND )
+    add_custom_target(format
+        COMMAND bash -c "find ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/include -iname \"*.cpp\" -o -iname \"*.hpp\" | xargs clang-tidy -format-style=file -p ${CMAKE_BINARY_DIR} -fix"
+        COMMAND bash -c "find ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/include -iname \"*.cpp\" -o -iname \"*.hpp\" | xargs clang-format --style=file -i"
+        VERBATIM
+    )
+ELSE()
+    add_custom_target(format
+        COMMAND bash -c "find ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/include -not -path \"*/python-bindings/*\" -iname \"*.cpp\" -o -iname \"*.hpp\" | xargs clang-tidy -format-style=file -p ${CMAKE_BINARY_DIR} -fix"
+        COMMAND bash -c "find ${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/include -not -path \"*/python-bindings/*\" -iname \"*.cpp\" -o -iname \"*.hpp\" | xargs clang-format --style=file -i"
+        VERBATIM
+    )
+ENDIF()
+
 
 IF( pybind11_FOUND )
     add_subdirectory(third-party/cvnp)
@@ -141,4 +150,5 @@ IF( pybind11_FOUND )
     install(TARGETS python-farshow
             LIBRARY DESTINATION lib
     )
+
 ENDIF()
