@@ -12,10 +12,8 @@ def main():
     parser = argparse.ArgumentParser(prog="Frame-streamer server",
                                      description=("A demo for frame-streamer – a minimalistic library to stream frames from e.g. "
                                                   "embedded devices.\nServer is capturing and streaming the frames."))
-    group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument('-i', '--ip',
+    parser.add_argument('-i', '--ip', required=True,
                        help="IP address of the client, which should receive stream. To send to multiple clients, enter broadcast address")
-    group.add_argument('ipaddr', nargs='?')
     parser.add_argument('-p', '--port', default=1100, type=int,
                         help="Port of the client, which will receive stream")
     parser.add_argument('-e', '--extension', default='.jpg', choices=['.jpg', '.png'],
@@ -33,7 +31,6 @@ def main():
     }
 
     ip = args.ip
-    ip = ip if ip is not None else args.ipaddr
     port = args.port
     extension = args.extension
     encodingParams = img_types.get(extension)[1:3]

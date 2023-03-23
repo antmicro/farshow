@@ -164,6 +164,19 @@ All below classes are available in the `farshow` module.
 
 The core of library i.e. `FrameSender` and `FrameReceiver` is accessible from Python. Python functions resemble C++ counterparts as close as possible. For clarity the usage details are below.
 
+### `farshow` server example
+
+After a succesful build, Python version of demo can be run inside the `build` directory, e.g.:
+```
+python3 example.py -i 127.0.0.1
+```
+This will start the demonstration server, streaming to the server running on `127.0.0.1` on the default port (1100). By default, `/dev/video0` is taken as a stream source.
+
+You can find more information about avaible arguments in command-line help:
+```
+python3 example.py --help
+```
+
 ### Sending frames
 
 You can use `FrameSender` in your program for the embedded device (server).
