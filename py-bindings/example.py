@@ -3,8 +3,10 @@ import cv2
 import signal
 import argparse
 
+
 def main():
 
+    global running
     running = False
 
     parser = argparse.ArgumentParser(prog="Frame-streamer server",
@@ -39,10 +41,14 @@ def main():
         encodingParams[1] = args.quality
     source = args.source
 
+    global originalHandler
+    originalHandler = signal.getsignal(signal.SIGINT)
+
     def signalHandler(signum, frame):
         print("Closing server...")
         global running
         running = False
+        signal.signal(signal.SIGINT, originalHandler)
 
     signal.signal(signal.SIGINT, signalHandler)
     running = True
