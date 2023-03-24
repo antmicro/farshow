@@ -6,7 +6,6 @@ import argparse
 
 def main():
 
-    global running
     running = False
 
     parser = argparse.ArgumentParser(prog="Frame-streamer server",
@@ -35,7 +34,6 @@ def main():
     if args.quality is not None:
         encodingParams[1] = args.quality
 
-    global originalHandler
     originalHandler = signal.getsignal(signal.SIGINT)
 
     def signalHandler(signum, frame):
