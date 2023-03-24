@@ -35,7 +35,8 @@ cmake -s . -B build
 
 ## Running the demo
 
-The project consists of a streaming library and a receiving application. They communicate with each other using a UDP protocol.
+The project consists of a streaming library and a receiving application. 
+They communicate with each other using a UDP protocol.
 
 ### `farshow` server example
 
@@ -45,9 +46,11 @@ After a successful build, you can run the demo inside the `build` directory, e.g
 ./farshow-server-example 127.0.0.1
 ```
 
-This will start the demonstration server, streaming frames to the server running on `127.0.0.1` on the default port (`1100`). By default, `/dev/video0` is taken as a stream source.
+This will start the demonstration server, streaming frames to the server running on `127.0.0.1` on the default port (`1100`).
+By default, `/dev/video0` is taken as a stream source.
 
-By default, the server sends frames in jpg format, with a quality factor of 95. To use e.g. png format with compression 4, add `-e .png -q 4` to the runtime parameters.
+By default, the server sends frames in JPEG format, with a quality factor of 95.
+To use e.g. png format with compression 4, add `-e .png -q 4` to the runtime parameters.
 
 You can find more information about available arguments in command-line help:
 
@@ -77,7 +80,8 @@ You can also find more information about available arguments in command-line hel
 
 All below classes are available in the `farshow` namespace.
 
-The core of the library are the `FrameSender` and `FrameReceiver` classes. They both derive from `UdpInterface`.
+The core of the library are the `FrameSender` and `FrameReceiver` classes.
+They both derive from `UdpInterface`.
 
 ### Sending frames
 
@@ -90,17 +94,21 @@ First, you should create an instance of the frame sender class:
 farshow::FrameSender streamer("196.168.1.15", 1111);
 ```
 
-Where `196.168.1.15` is the client address and `1111` its IP port. The constructor is also responsible for creating a socket.
+Where `196.168.1.15` is the client address and `1111` its IP port.
+The constructor is also responsible for creating a socket.
 
-To send a frame under the name "my_stream" use:
+To send a frame under the name `my_stream` use:
 
 ```c++
 streamer.sendFrame(frame, "my_stream");
 ```
 
-Where a frame is a [cv::Mat](https://docs.opencv.org/4.x/d3/d63/classcv_1_1Mat.html), to match the client side, the frame should be sent as grayscale or BGR. We chose BGR as a type common in OpenCV.
+Where a frame is a [cv::Mat](https://docs.opencv.org/4.x/d3/d63/classcv_1_1Mat.html), to match the client side, the frame should be sent as grayscale or BGR.
+We chose BGR as a type common in OpenCV.
 
-This will send the frame as a jpg with quality 95. You can send it in other formats, providing the following arguments. E.g., to send it as a png with compression 4, use:
+This will send the frame as a JPEG with quality 95.
+You can send it in other formats, providing the following arguments.
+E.g., to send it as a png with compression 4, use:
 
 ```c++
 streamer.sendFrame(frame, "my_stream", ".png", cv::IMWRITE_PNG_COMPRESSION=4);
@@ -111,7 +119,12 @@ Look for more information about supported formats in [OpenCV image reading and w
 To ensure continuity of the stream, use the same name for each frame within it.
 
 #### Technical details
-To send a frame, we must encode it and check if it fits the datagram. If it does not, it is split into parts. Each frame has an id and number of parts. Each part also has a separate id. The entire structure of the message is available in the [`udpinterface.hpp`](include/farshow/udpinterface.hpp) file as `FrameMessage`. Then the message is sent to the client, which we assigned when creating the instance of `FrameSender`.
+To send a frame, we must encode it and check if it fits the datagram.
+If it does not, it is split into parts.
+Each frame has an id and number of parts.
+Each part also has a separate id.
+The entire structure of the message is available in the [`udpinterface.hpp`](include/farshow/udpinterface.hpp) file as `FrameMessage`.
+Then the message is sent to the client, which we assigned when creating the instance of `FrameSender`.
 
 
 ### Receiving frames
@@ -125,7 +138,8 @@ To receive the frame, create an instance of the `FrameReceiver`:
 farshow::FrameReceiver receiver();
 ```
 
-Without arguments, it binds the socket to all available interfaces, with the default port 1100. You can, of course, provide the client IP address and port.
+Without arguments, it binds the socket to all available interfaces, with the default port 1100.
+You can, of course, provide the client IP address and port.
 
 Then fetch the frame:
 ```c++
@@ -146,21 +160,32 @@ cv::waitKey(0);                                   // Wait for a keypress before 
 #### Technical details
 
 `receiveFrame` is a loop which receives parts of frames from various streams and joins them until any of the frames is complete (contains all parts).
-To keep the frames in order, we've created a mapping from a stream name to a linked list of `FrameContainer`s with all stream frames. It's worth noting that the frames in the stream are mostly incomplete because when any of them is complete, we return it immediately. Frames in the list are sorted by id.
+To keep the frames in order, we've created a mapping from a stream name to a linked list of `FrameContainer`s with all stream frames.
+It's worth noting that the frames in the stream are mostly incomplete because when any of them is complete, we return it immediately.
+Frames in the list are sorted by id.
 
-When a new part of a frame appears, firstly we find the stream to which it belongs (by name). Then we look at the frame id and (like in insertion sort) look for a proper place for it. Then we copy the data from the frame part to the place where they should be in the actual frame. Since the ids can overflow, the algorithm assumes that when e.g. frame with id 0 comes after 4294967295, it should be placed at the end to ensure stream continuity.
+When a new part of a frame appears, firstly we find the stream to which it belongs (by name).
+Then we look at the frame id and (like in insertion sort) look for a proper place for it. 
+Then we copy the data from the frame part to the place where they should be in the actual frame.
+Since the ids can overflow, the algorithm assumes that when e.g. frame with id 0 comes after 4294967295, it should be placed at the end to ensure stream continuity.
 
 When the frame is complete, we delete all incomplete frames before it (because we have a newer one), decode it and return its name and image (in a `Frame` structure).
 
-[The `farshow` program](src/farshow-client.cpp) uses [Dear ImGui](https://github.com/ocornut/imgui) to display frames. The program has two threads. One is responsible for receiving frames and the main one – for displaying them. They communicate via a map with stream names and their most recent frames.
+[The `farshow` program](src/farshow-client.cpp) uses [Dear ImGui](https://github.com/ocornut/imgui) to display frames. 
+The program has two threads.
+One is responsible for receiving frames and the main one – for displaying them.
+They communicate via a map with stream names and their most recent frames.
 When the receiver thread receives a new frame, it puts it in the map, changing the most recent image.
-When the main thread notices that the frame is changed, it reloads the texture assigned to the frame and the displayed image changes. Look at [Image Loading and Displaying examples with ImGui](https://github.com/ocornut/imgui/wiki/Image-Loading-and-Displaying-Examples) for more information on how Dear ImGui displays photos.
+When the main thread notices that the frame is changed, it reloads the texture assigned to the frame and the displayed image changes.
+Look at [Image Loading and Displaying examples with ImGui](https://github.com/ocornut/imgui/wiki/Image-Loading-and-Displaying-Examples) for more information on how Dear ImGui displays photos.
 
 ## Usage in Python
 
 All below classes are available in the `farshow` module.
 
-The core of library i.e. `FrameSender` and `FrameReceiver` is accessible from Python. Python functions resemble C++ counterparts as close as possible. For clarity the usage details are below.
+The core classes`FrameSender` and `FrameReceiver` are accessible from Python.
+Python functions resemble C++ counterparts as close as possible.
+For clarity the usage details are below.
 
 ### `farshow` server example
 
@@ -168,12 +193,15 @@ After a succesful build, Python version of demo can be run inside the `build` di
 ```
 python3 example.py -i 127.0.0.1
 ```
-This will start the demonstration server, streaming to the server running on `127.0.0.1` on the default port (1100). By default, `/dev/video0` is taken as a stream source.
+This will start the demonstration server, streaming to the server running on `127.0.0.1` on the default port (1100).
+By default, `/dev/video0` is taken as a stream source.
 
-You can find more information about avaible arguments in command-line help:
+You can find more information about available arguments in command-line help:
 ```
 python3 example.py --help
 ```
+
+Python streaming script is compatible with `farshow` application and they can be used together.
 
 ### Sending frames
 
@@ -182,31 +210,37 @@ You can use `FrameSender` in your program for the embedded device (server).
 First, you should create an instance of the frame sender class:
 ```python
 import farshow
-streamer = farshow.FrameSender("196.168.1.15", 1111)
+streamer = farshow.FrameSender("0.0.0.0", 1111)
 ```
-Where `196.168.1.15` is the client address adn `1111` is IP port. The constructor is also responsible for creating socket.
+Where `0.0.0.0` is the client address and `1111` is IP port.
+The constructor is also responsible for creating socket.
 
-To send a frame under the name "my_stream" use:
+To send a frame under the name `my_stream` use:
 ```python
 streamer.sendFrame(frame, "my_stream")
 ```
-Where a frame is a [numpy.ndarray](https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html), to match client side, the frame should be sent OpenCV compatible format, grayscale or BGR. We chose BGR as a type common in OpenCV.
+Where the frame is a [numpy.ndarray](https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html).
+The frame should be in BGR or grayscale format, because it will be passed to OpenCV functions.
 
-This will send the frame as a jpg with quality 95. You can send it in other formats, providing the following arguments. E.g., to send it as png with compression 4, use:
+This will send the frame as a JPEG with quality 95.
+You can send it with other parameters by providing appropriate arguments.
+E.g., to send it as PNG with compression 4, use:
 ```python
 streamer.sendFrame(frame, "my_stream", ".png", [cv2.IMWRITE_PNG_COMPRESSION, 4])
 ```
 
 ### Receiving frames
 
-The receiver is on client side. Here we have to join the parts of frame back together and keep the frames in order.
+The receiver is on client side.
+Here we have to join the parts of frame back together and keep the frames in order.
 
 To receive the frame, create an instance of `FrameReceiver`:
 ```python
 import farshow
-receiver = farshow.FrameReceiver();
+receiver = farshow.FrameReceiver()
 ```
-Without arguments, it binds the socket to all avaible interfaces, with the default port 1100. You can, of course, provide the client IP address and port.
+Without arguments, it binds the socket to all available interfaces, with the default port 1100.
+You can, of course, provide the client IP address and port.
 
 Then fetch the frame:
 ```python
