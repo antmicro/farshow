@@ -33,8 +33,6 @@ To build the project, go to its root directory and execute:
 cmake -s . -B build
 ```
 
-To be able to use Python bindings outside of build directory PYTHONPATH environment variable must be adjusted accordingly.
-
 ## Running the demo
 
 The project consists of a streaming library and a receiving application. They communicate with each other using a UDP protocol.

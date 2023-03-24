@@ -129,8 +129,9 @@ ENDIF()
 
 
 IF( pybind11_FOUND )
+    find_package (Python3 COMPONENTS Interpreter Development)
     add_subdirectory(third-party/cvnp)
-    pybind11_add_module(python-farshow 
+    pybind11_add_module(python-farshow
         src/python-bindings/main.cpp
         src/python-bindings/streamexception.cpp
         src/python-bindings/udpinterface.cpp
@@ -148,7 +149,7 @@ IF( pybind11_FOUND )
     file(COPY src/python-bindings/example.py
          DESTINATION .)
     install(TARGETS python-farshow
-            LIBRARY DESTINATION lib
+            LIBRARY DESTINATION ${Python3_SITEARCH}
     )
 
 ENDIF()
