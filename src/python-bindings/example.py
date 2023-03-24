@@ -16,7 +16,7 @@ def main():
                        help="IP address of the client, which should receive stream. To send to multiple clients, enter broadcast address")
     parser.add_argument('-p', '--port', default=1100, type=int,
                         help="Port of the client, which will receive stream")
-    parser.add_argument('-e', '--extension', default='.jpg', choices=['.jpg', '.png'],
+    parser.add_argument('-e', '--extension', default='jpg', choices=['jpg', 'png'],
                         help="Extension of the format in which frames will be send (e.g. `.jpg`, `.png`)")
     parser.add_argument('-q', '--quality', type=int,
                         help="Frames quality factor (for jpg in range 0 to 100, for png it's compression rate from 0 to 9)")
@@ -26,17 +26,14 @@ def main():
     args = parser.parse_args()
 
     img_types = {
-            '.jpg': ['.jpg', cv2.IMWRITE_JPEG_QUALITY, 65],
-            '.png': ['.png', cv2.IMWRITE_PNG_COMPRESSION, 5]
+            'jpg': ['.jpg', cv2.IMWRITE_JPEG_QUALITY, 65],
+            'png': ['.png', cv2.IMWRITE_PNG_COMPRESSION, 5]
     }
 
-    ip = args.ip
-    port = args.port
-    extension = args.extension
-    encodingParams = img_types.get(extension)[1:3]
+    extension = img_types.get(args.extension)[0]
+    encodingParams = img_types.get(args.extension)[1:3]
     if args.quality is not None:
         encodingParams[1] = args.quality
-    source = args.source
 
     global originalHandler
     originalHandler = signal.getsignal(signal.SIGINT)
@@ -49,8 +46,8 @@ def main():
 
     signal.signal(signal.SIGINT, signalHandler)
     running = True
-    cap = cv2.VideoCapture(source)
-    streamer = farshow.FrameSender(ip, port)
+    cap = cv2.VideoCapture(args.source)
+    streamer = farshow.FrameSender(args.ip, args.port)
 
     while running:
         ret, frame = cap.read()
