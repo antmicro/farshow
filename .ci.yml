@@ -20,26 +20,33 @@ before_script:
         make
 
 stages:
-  - lint
+  - basic-tests
   - export-test
 
 format:
-  stage: lint
+  stage: basic-tests
   script:
     - mkdir build && cd build
     - cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
     - make format
     - test -z $(git diff) && exit 0 || exit 1
 
+build:
+  stage: basic-tests
+  script:
+    - mkdir build && cd build
+    - cmake ..
+    - make -j`nproc`
+
 example-build:
   stage: export-test
   script:
     - mkdir build && cd build
     - cmake ..
-    - make && make install
+    - make -j`nproc` && make install
     - cd ../tests/example-build
     - cp ../../src/app-example.cpp ./
     - cp ../../src/farshow-client.cpp ./
     - mkdir build && cd build
     - cmake ..
-    - make
+    - make -j`nproc`
