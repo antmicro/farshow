@@ -11,8 +11,8 @@ PYBIND11_MAKE_OPAQUE(std::vector<uchar>)
 void initFrameReceiver(py::module &m){
     py::bind_vector<std::vector<uchar>>(m, "VectorUchar");
     py::class_<farshow::Frame>(m, "Frame")
-        .def(py::init([](const std::string& name, py::array& a)
-                    {return new farshow::Frame(name, cvnp::nparray_to_mat(a));}),
+        .def(py::init( [](const std::string& name, py::array& a)
+                    {return farshow::Frame{name, cvnp::nparray_to_mat(a)};}),
             py::arg("name"), py::arg("img"))
         .def_readwrite("name", &farshow::Frame::name)
         .def_property("img", [](farshow::Frame& self) {return cvnp::mat_to_nparray(self.img, true);},
