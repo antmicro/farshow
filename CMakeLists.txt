@@ -10,7 +10,7 @@ find_package(OpenCV REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(Threads)
-find_package(pybind11)
+find_package(pybind11 2.10)
 
 include_directories(
     ${OpenCV_INCLUDE_DIRS}
