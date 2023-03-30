@@ -27,7 +27,8 @@ Additional requirements for Python bindings:
 * [NumPy](https://numpy.org/install)
 * [pybind11](https://pybind11.readthedocs.io/en/stable/installing.html)
 * [cvnp](https://github.com/pthom/cvnp)
-Please note that `pybind11` should be installed from sources with CMake instead of using `pip`.
+
+Please note that `pybind11` should be installed from sources with `CMake` instead of using `pip`.
 
 To build the project, go to its root directory and execute:
 ```
