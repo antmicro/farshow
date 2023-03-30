@@ -80,7 +80,7 @@ target_link_libraries(${PROJECT_NAME}
     ${PROJECT_NAME}-client
 )
 
-add_compile_options(-Wall -Wextra -pedantic  -o)
+add_compile_options(-Wall -Wextra -pedantic -O)
 
 configure_file(
     ${PROJECT_SOURCE_DIR}/${PROJECT_NAME}Config.cmake.in
@@ -140,7 +140,7 @@ IF( pybind11_FOUND )
         src/framesender.cpp
         src/python-bindings/framereceiver.cpp
         src/framereceiver.cpp
-    )
+        )
     set_target_properties(python-farshow PROPERTIES OUTPUT_NAME farshow)
     target_link_libraries(python-farshow PRIVATE 
         ${OpenCV_LIBS} 
