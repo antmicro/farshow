@@ -10,7 +10,7 @@ namespace farshow
 void FrameSender::sendFrame(cv::Mat &frame, std::string name, std::string extension, std::vector<int> encoding_params)
 {
     // Create a message
-    FrameMessage msg = {0};
+    FrameMessage msg{};
 
     strncpy(msg.data, name.c_str(), sizeof(msg.data) / sizeof(msg.data[0]));
     msg.header.name_length = name.length() + 1;
