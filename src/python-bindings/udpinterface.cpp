@@ -16,14 +16,15 @@ void initUdpInterface(py::module &m)
                  [](farshow::FrameHeader header, std::string &data)
                  {
                      farshow::FrameMessage msg = {header, ""};
-                     std::strcpy(msg.data, data.c_str());
+                     std::strncpy(msg.data, data.c_str(), sizeof(msg.data) / sizeof(msg.data[0]));
                      return msg;
                  }),
              py::arg("header"), py::arg("data"))
         .def_readwrite("header", &farshow::FrameMessage::header)
         .def_property(
             "data", [](farshow::FrameMessage &self) { return self.data; },
-            [](farshow::FrameMessage &self, std::string &a) { std::strcpy(self.data, a.c_str()); });
+            [](farshow::FrameMessage &self, std::string &a)
+            { std::strncpy(self.data, a.c_str(), sizeof(self.data) / sizeof(self.data[0])); });
     py::class_<farshow::UdpInterface>(m, "UdpInterface")
         .def(py::init<const std::string &, int>(), py::arg("client_address") = "", py::arg("client_port") = 1100);
 }
