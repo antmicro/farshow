@@ -78,8 +78,11 @@ std::list<FrameContainer>::iterator FrameReceiver::addPart(FrameMessage msg)
         itr = streams[name].insert(itr, frame);
     }
     // Copy image data to the frame pointed by iterator
-    memcpy(itr->img.data() + msg.header.part_id * part_size, msg.data + msg.header.name_length, part_size);
-    itr->added_parts++;
+    if (msg.header.total_parts == itr->total_parts)
+    {
+        memcpy(itr->img.data() + msg.header.part_id * part_size, msg.data + msg.header.name_length, part_size);
+        itr->added_parts++;
+    }
 
     return itr;
 }
