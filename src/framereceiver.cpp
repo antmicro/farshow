@@ -70,6 +70,12 @@ std::list<FrameContainer>::iterator FrameReceiver::addPart(FrameMessage msg)
             }
         }
     }
+    // Delete old frame with same id and different size
+    if (itr != streams[name].end() && msg.header.total_parts != itr->total_parts)
+    {
+        streams[name].erase(itr);
+        itr = streams[name].end();
+    }
     if (itr == streams[name].end() || itr->id > msg.header.frame_id)
     {
         // Create a new frame
@@ -78,11 +84,8 @@ std::list<FrameContainer>::iterator FrameReceiver::addPart(FrameMessage msg)
         itr = streams[name].insert(itr, frame);
     }
     // Copy image data to the frame pointed by iterator
-    if (msg.header.total_parts == itr->total_parts)
-    {
-        memcpy(itr->img.data() + msg.header.part_id * part_size, msg.data + msg.header.name_length, part_size);
-        itr->added_parts++;
-    }
+    memcpy(itr->img.data() + msg.header.part_id * part_size, msg.data + msg.header.name_length, part_size);
+    itr->added_parts++;
 
     return itr;
 }
