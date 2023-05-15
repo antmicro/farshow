@@ -110,33 +110,42 @@ int main(int argc, const char **argv)
 {
     static Config config = parseOptions(argc, argv); ///< parsed command line arguments
 
-    farshow::initGui();
-    std::thread receiver_thread = std::thread(receiveFrames, config); ///< thread receiving messages from servers
-    GLFWwindow *window = farshow::createWindow("farshow");            ///< window for displaying the streams
-    farshow::setupDearImGui(window);
-
-    while (!glfwWindowShouldClose(window))
+    try
     {
-        glfwPollEvents();
+        farshow::initGui();
+        std::thread receiver_thread = std::thread(receiveFrames, config); ///< thread receiving messages from servers
+        GLFWwindow *window = farshow::createWindow("farshow");            ///< window for displaying the streams
+        farshow::setupDearImGui(window);
 
-        // Display all streams
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-
-        frames_mutex.lock();
-        for (auto &f : frames)
+        while (!glfwWindowShouldClose(window))
         {
-            f.second.display();
+            glfwPollEvents();
+
+            // Display all streams
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+
+            frames_mutex.lock();
+            for (auto &f : frames)
+            {
+                f.second.display();
+            }
+            frames_mutex.unlock();
+
+            farshow::render(window);
         }
-        frames_mutex.unlock();
 
-        farshow::render(window);
+        std::cout << "Closing client...\n";
+        shutdown(socket_id, 2); // To stop the child thread, blocked on recv
+        receiver_thread.join();
+        farshow::cleanUp(window);
     }
-
-    std::cout << "Closing client...\n";
-    shutdown(socket_id, 2); // To stop the child thread, blocked on recv
-    receiver_thread.join();
-    farshow::cleanUp(window);
+    catch (farshow::StreamException &ex)
+    {
+        std::cerr << ex.what() << std::endl;
+        std::cerr << "Closing farshow" << std::endl;
+        return 1;
+    }
     return 0;
 }
