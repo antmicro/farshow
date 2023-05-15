@@ -142,8 +142,8 @@ IF( pybind11_FOUND )
         src/framereceiver.cpp
         )
     set_target_properties(python-farshow PROPERTIES OUTPUT_NAME farshow)
-    target_link_libraries(python-farshow PRIVATE 
-        ${OpenCV_LIBS} 
+    target_link_libraries(python-farshow PRIVATE
+        ${OpenCV_LIBS}
         cvnp
     )
     file(COPY src/python-bindings/example.py
