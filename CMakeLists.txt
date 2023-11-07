@@ -12,7 +12,7 @@ find_package(glfw3 REQUIRED)
 find_package(Threads)
 find_package(pybind11 2.10)
 
-include_directories(
+set(INCLUDE_DIRECTORIES
     ${OpenCV_INCLUDE_DIRS}
     ${OPENGL_INCLUDE_DIRS}
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -34,13 +34,14 @@ add_library(${PROJECT_NAME}-imgui SHARED
     third-party/imgui/backends/imgui_impl_glfw.cpp
     third-party/imgui/backends/imgui_impl_opengl3.cpp
 )
+target_include_directories(${PROJECT_NAME}-imgui PUBLIC ${INCLUDE_DIRECTORIES})
 
 add_library(${PROJECT_NAME}-connection SHARED
     src/udpinterface.cpp
     src/framesender.cpp
     src/framereceiver.cpp
 )
-
+target_include_directories(${PROJECT_NAME}-connection PUBLIC ${INCLUDE_DIRECTORIES})
 set_target_properties(${PROJECT_NAME}-connection PROPERTIES
     VERSION ${PROJECT_VERSION}
     SOVERSION ${PROJECT_VERSION}
@@ -49,7 +50,7 @@ set_target_properties(${PROJECT_NAME}-connection PROPERTIES
 add_executable(${PROJECT_NAME}-server-example
     src/app-example.cpp
 )
-
+target_include_directories(${PROJECT_NAME}-server-example PUBLIC ${INCLUDE_DIRECTORIES})
 target_link_libraries(${PROJECT_NAME}-server-example PRIVATE
     ${PROJECT_NAME}-connection
     ${OpenCV_LIBS}
@@ -61,7 +62,7 @@ target_link_libraries(${PROJECT_NAME}-server-example PRIVATE
 add_library(${PROJECT_NAME}-client
     src/client.cpp
 )
-
+target_include_directories(${PROJECT_NAME}-client PUBLIC ${INCLUDE_DIRECTORIES})
 target_link_libraries(${PROJECT_NAME}-client PUBLIC
     ${PROJECT_NAME}-connection
     ${OpenCV_LIBS}
@@ -75,7 +76,7 @@ target_link_libraries(${PROJECT_NAME}-client PUBLIC
 add_executable(${PROJECT_NAME}
     src/farshow-client.cpp
 )
-
+target_include_directories(${PROJECT_NAME} PUBLIC ${INCLUDE_DIRECTORIES})
 target_link_libraries(${PROJECT_NAME}
     ${PROJECT_NAME}-client
 )
@@ -146,6 +147,7 @@ IF( pybind11_FOUND )
         ${OpenCV_LIBS}
         cvnp
     )
+    target_include_directories(python-farshow PRIVATE ${INCLUDE_DIRECTORIES})
     file(COPY src/python-bindings/example.py
          DESTINATION .)
     install(TARGETS python-farshow
