@@ -3,6 +3,9 @@ image: debian:bookworm
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
 
+.ace: &ace
+    tags: ['ace-x86_64']
+
 before_script:
   - apt-get update
   - DEBIAN_FRONTEND=noninteractive apt-get install -qqy
@@ -20,12 +23,8 @@ before_script:
         pybind11-dev
         make
 
-stages:
-  - basic-tests
-  - export-test
-
 format:
-  stage: basic-tests
+  <<: *ace
   script:
     - mkdir build && cd build
     - cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
@@ -33,14 +32,14 @@ format:
     - test -z $(git diff) && exit 0 || exit 1
 
 build:
-  stage: basic-tests
+  <<: *ace
   script:
     - mkdir build && cd build
     - cmake ..
     - make -j`nproc`
 
 example-build:
-  stage: export-test
+  <<: *ace
   script:
     - mkdir build && cd build
     - cmake ..
